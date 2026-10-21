@@ -314,7 +314,7 @@ const QI=Object.fromEntries(Q.map(q=>[q.id,q]));
 
 /* ---------- estado ---------- */
 /* PROTOTIPO:true mostra exemplo e relatório da equipe; na versão publicada fica false e as respostas vão para o Apps Script */
-const CONFIG={PROTOTIPO:false, ENDPOINT:'COLE-AQUI-A-URL-DO-APP-DA-WEB', TOKEN:'sigma-y2RlrdMklovPj_Tj41di8yjOuAoj0Iz8'};
+const CONFIG={PROTOTIPO:false, ENDPOINT:'https://script.google.com/macros/s/AKfycbwmq-tI3jAYhoJt7lHlXCmOn0Y_A59dByE_9EUk3zuRubI4JLGVRVpsp0ZmsusJq1HK/exec', TOKEN:'sigma-y2RlrdMklovPj_Tj41di8yjOuAoj0Iz8'};
 let A={}, cur='welcome', soundOn=true, demo=false;
 const okCode=c=>/^[A-Z]{3}-\d{2}$/.test(c||'');
 let CODE='';try{CODE=(new URLSearchParams(location.search).get('c')||'').toUpperCase().trim()}catch(e){}
