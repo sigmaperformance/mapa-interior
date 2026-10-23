@@ -259,10 +259,20 @@ function sair(silencioso, motivo) {
 
 /* ============ REGRAS DO PROGRAMA ============ */
 function fase(dia) { const d = Math.max(1, Math.min(90, dia || 1)); return FASES.find(f => d >= f.de && d <= f.ate); }
+// Treinos da fase: vêm da aba Treinos da planilha; sem ela, usa a trilha padrão acima.
+function treinosDaFase(f) {
+  const lst = (S.est && S.est.treinos) || [], g = {};
+  lst.filter(x => !x.f || !x.f.length || x.f.includes(f.n)).sort((a, b) => a.o - b.o)
+    .forEach(x => (g[x.t] = g[x.t] || []).push({ nome: x.nome, reps: x.reps, ajuste: x.ajuste, video: x.video }));
+  if (!Object.keys(g).length) f.treinos.forEach(t => g[t] = TREINOS[t]);
+  return g;
+}
+const letrasDaFase = f => Object.keys(treinosDaFase(f)).sort();
+function ytId(u) { u = String(u || '').trim(); const m = u.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/|live\/))([\w-]{6,})/); return m ? m[1] : (/^[\w-]{11}$/.test(u) ? u : null); }
 function proximoTreino(est) {
-  const f = fase(est.dia);
+  const f = fase(est.dia), letras = letrasDaFase(f);
   const feitos = (est.diario || []).filter(x => x.t === 1 && x.p >= f.de && x.p <= f.ate).length;
-  return f.treinos[feitos % f.treinos.length];
+  return letras[feitos % letras.length];
 }
 function treinosNaSemana(est) {
   const hoje = est.hoje ? est.hoje.d : null, lst = est.diario || [];
@@ -457,7 +467,7 @@ function telaHoje() {
     <p class="eyebrow">Treino</p>
     ${e.local === 'academia'
       ? `<h3>Dia de academia ou de casa?</h3><p class="muted small">Na academia, siga o guia do Método Sigma da sua fase. Em casa, o próximo treino com o TRX é o <b>${pt}</b>.</p>`
-      : `<h3>Próximo treino: ${pt}</h3><p class="muted small">5 exercícios · ${d <= 14 ? '2 voltas' : '3 voltas'} · cerca de 20 minutos</p>`}
+      : `<h3>Próximo treino: ${pt}</h3><p class="muted small">${(treinosDaFase(f)[pt] || []).length} exercícios · ${d <= 14 ? '2 voltas' : '3 voltas'} · cerca de 20 minutos</p>`}
     <p class="small" style="margin:8px 0 12px">Nesta semana: <b>${sem} de 3</b> treinos</p>
     <button class="btn ghost" data-tab="treinos">Abrir treinos</button>
   </div>
@@ -467,7 +477,8 @@ function telaHoje() {
 /* ---------- treinos ---------- */
 function telaTreinos() {
   const e = S.est, d = Math.max(1, Math.min(e.dia || 1, 90)), f = fase(d), pt = proximoTreino(e);
-  const sel = S.treinoSel && f.treinos.includes(S.treinoSel) ? S.treinoSel : pt;
+  const G = treinosDaFase(f), letras = Object.keys(G).sort();
+  const sel = S.treinoSel && letras.includes(S.treinoSel) ? S.treinoSel : pt;
   const trilha = `
     <div class="card">
       <p class="eyebrow">Fase ${f.n} de 3 · dias ${f.de} a ${f.ate}</p>
@@ -476,10 +487,10 @@ function telaTreinos() {
       <ul class="rules">${f.regras.map(r => `<li>${r}</li>`).join('')}</ul>
       <p class="small muted" style="margin-top:10px">Meta: 3 treinos por semana, com um dia de descanso entre eles.</p>
     </div>
-    <div class="seg" role="tablist">${f.treinos.map(t => `<button role="tab" class="${t === sel ? 'on' : ''}" data-treino="${t}" aria-selected="${t === sel}">Treino ${t}${t === pt ? '<small>Próximo</small>' : ''}</button>`).join('')}</div>
+    <div class="seg" role="tablist">${letras.map(t => `<button role="tab" class="${t === sel ? 'on' : ''}" data-treino="${t}" aria-selected="${t === sel}">Treino ${t}${t === pt ? '<small>Próximo</small>' : ''}</button>`).join('')}</div>
     <div class="card">
       <p class="eyebrow">Circuito · ${d <= 14 ? '2 voltas' : '3 voltas'}</p>
-      ${TREINOS[sel].map((x, i) => `<div class="ex"><span class="n">${i + 1}</span><div style="flex:1"><h3>${esc(x.nome)}</h3><p><b>${esc(x.reps)}</b> · ${esc(x.ajuste)}</p><button class="btn ghost sm" style="margin-top:8px" data-video="${x.video}" data-nome="${esc(x.nome)}">Ver vídeo</button></div></div>`).join('')}
+      ${(G[sel] || []).map((x, i) => `<div class="ex"><span class="n">${i + 1}</span><div style="flex:1"><h3>${esc(x.nome)}</h3><p><b>${esc(x.reps)}</b> · ${esc(x.ajuste)}</p>${x.video ? `<button class="btn ghost sm" style="margin-top:8px" data-video="${esc(x.video)}" data-nome="${esc(x.nome)}">Ver vídeo</button>` : ''}</div></div>`).join('')}
     </div>
     <button class="btn" id="fiz">Concluí este treino</button>
     <p class="small muted center" style="margin-top:10px">Se sentir dor que não passa, tontura ou falta de ar, pare e toque em <b>Senti algo estranho</b>, na tela Hoje.</p>`;
@@ -561,6 +572,7 @@ const EMERG = {
 };
 function sobreposicao() {
   const o = S.over;
+  if (o.tipo === 'video' && !o.id) return `<div class="modal" id="modal"><div class="box"><h3>${esc(o.nome)}</h3><a class="btn" style="margin-top:12px;text-decoration:none" href="${esc(o.link)}" target="_blank" rel="noopener">Abrir o vídeo</a><button class="btn ghost" style="margin-top:10px" id="fechar">Fechar</button></div></div>`;
   if (o.tipo === 'video') return `<div class="modal" id="modal"><div class="box"><div class="vid"><iframe src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(o.id)}?rel=0&playsinline=1" title="Vídeo: ${esc(o.nome)}" allow="encrypted-media; picture-in-picture" allowfullscreen></iframe></div><button class="btn ghost" style="margin-top:12px" id="fechar">Fechar</button></div></div>`;
   if (o.tipo === 'sos') return `<div class="over"><div class="wrap"><p class="eyebrow">Segurança</p><h1>O que aconteceu?</h1><p class="muted">Escolha o que mais se parece com o que você sentiu.</p><div class="place">${MOTIVOS.map(m => `<button data-motivo="${m[0]}"><b style="font-size:17px;margin:0">${m[1]}</b></button>`).join('')}</div><button class="btn ghost" style="margin-top:16px" id="fechar">Voltar</button></div></div>`;
   if (o.tipo === 'emerg') {
@@ -601,7 +613,7 @@ function ligarComum() {
     catch (e) { b.disabled = false; toast('Sem conexão. Tente de novo.'); }
   };
   document.querySelectorAll('[data-treino]').forEach(b => b.onclick = () => { S.treinoSel = b.dataset.treino; render(); });
-  document.querySelectorAll('[data-video]').forEach(b => b.onclick = () => { S.over = { tipo: 'video', id: b.dataset.video, nome: b.dataset.nome }; render(); });
+  document.querySelectorAll('[data-video]').forEach(b => b.onclick = () => { S.over = { tipo: 'video', id: ytId(b.dataset.video), link: b.dataset.video, nome: b.dataset.nome }; render(); });
   if ($('#sos')) $('#sos').onclick = () => { S.over = { tipo: 'sos' }; render(); };
   document.querySelectorAll('[data-motivo]').forEach(b => b.onclick = () => abrirEmergencia(b.dataset.motivo, true));
   if ($('#abrirCk')) $('#abrirCk').onclick = () => { S.over = { tipo: 'ck', i: 0, r: {}, numero: S.est.checkin.numero }; render(); };
