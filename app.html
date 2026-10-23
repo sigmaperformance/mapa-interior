@@ -230,7 +230,10 @@ const LS = {
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
   del(k) { try { localStorage.removeItem(k); } catch (e) {} }
 };
-const S = { sessao: LS.get('sigma_app_sessao'), est: LS.get('sigma_app_estado'), tela: 'hoje', treinoSel: null, login: { etapa: 'codigo', codigo: LS.get('sigma_app_codigo') || '' }, over: null };
+const COD_URL = (() => { try { const c = (new URLSearchParams(location.search).get('c') || '').toUpperCase().trim(); return /^[A-Z]{3}-\d{2}$/.test(c) ? c : ''; } catch (e) { return ''; } })();
+const S = { sessao: LS.get('sigma_app_sessao'), est: LS.get('sigma_app_estado'), tela: 'hoje', treinoSel: null, login: { etapa: 'codigo', codigo: COD_URL || LS.get('sigma_app_codigo') || '' }, over: null };
+// Se o link é de outra aluna, não reaproveita a sessão guardada neste aparelho
+if (COD_URL && S.est && S.est.codigo && S.est.codigo !== COD_URL) { S.sessao = null; S.est = null; }
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -273,6 +276,7 @@ function treinosNaSemana(est) {
 function render() {
   const app = $('#app');
   if (!S.sessao || !S.est) { app.innerHTML = telaLogin(); ligarLogin(); return; }
+  if (S.est.etapa === 'avaliacao') { app.innerHTML = `<div class="wrap">${telaAvaliacao()}</div>`; ligarAvaliacao(); return; }
   if (!S.est.local) { app.innerHTML = `<div class="wrap">${telaLocal(true)}</div>`; ligarLocal(); return; }
   const telas = { hoje: telaHoje, treinos: telaTreinos, evolucao: telaEvolucao, perfil: telaPerfil };
   app.innerHTML = `<div class="wrap">${telas[S.tela]()}</div>${abas()}${S.over ? sobreposicao() : ''}`;
@@ -368,6 +372,34 @@ function ligarLogin() {
   };
 }
 function entrou(j) { S.sessao = j.sessao; LS.set('sigma_app_sessao', j.sessao); S.est = j.estado; LS.set('sigma_app_estado', j.estado); S.tela = 'hoje'; render(); }
+
+/* ---------- antes da liberação: o Mapa Interior ---------- */
+function telaAvaliacao() {
+  const e = S.est;
+  if (!e.avaliacaoFeita) return `<p class="brand">Sigma Mulher 35+</p>
+    <p class="eyebrow" style="margin-top:18px">Primeiro passo</p>
+    <h1>Oi${e.nome ? ', ' + esc(e.nome) : ''}. Vamos começar pelo seu Mapa Interior</h1>
+    <p class="muted">É a avaliação que mostra para a equipe Sigma como você está hoje: corpo, sono, energia, emoções e rotina. Com ela, o seu programa de 90 dias começa a partir de você.</p>
+    <div class="card"><ul class="rules" style="margin:0"><li>Leva cerca de 15 minutos.</li><li>Responda com calma, num lugar tranquilo.</li><li>Não existe resposta certa ou errada.</li></ul></div>
+    <button class="btn" id="irMapa">Começar meu Mapa Interior</button>
+    <div class="card" style="margin-top:22px"><p class="eyebrow">Depois do Mapa</p><ul class="rules" style="margin:0"><li>A equipe lê as suas respostas.</li><li>Você recebe a mensagem de que o seu dia 1 foi liberado.</li><li>Aqui no app aparecem o seu diário, os treinos e a sua flor.</li></ul></div>
+    <button class="link" id="sair" style="display:block;margin:10px auto 0">Sair deste aparelho</button>`;
+  return `<p class="brand">Sigma Mulher 35+</p>
+    <div class="card hl" style="margin-top:22px"><p class="eyebrow">Mapa Interior recebido</p><h2>Recebemos as suas respostas</h2>
+      <p class="muted" style="margin:8px 0 0">A equipe Sigma está lendo o seu Mapa Interior e vai liberar o seu dia 1. Você recebe uma mensagem no WhatsApp quando estiver tudo pronto.</p></div>
+    <button class="btn ghost" id="atualizar">Ver se já foi liberado</button>
+    <a class="btn ghost" style="margin-top:10px;text-decoration:none" href="${zap('Oi! Sou ' + (e.nome || 'aluna') + ', código ' + e.codigo + '. Já respondi o Mapa Interior.')}" target="_blank" rel="noopener">Falar com a equipe</a>
+    <button class="link" id="sair" style="display:block;margin:10px auto 0">Sair deste aparelho</button>`;
+}
+function ligarAvaliacao() {
+  if ($('#irMapa')) $('#irMapa').onclick = () => { location.href = S.est.linkAvaliacao; };
+  if ($('#atualizar')) $('#atualizar').onclick = async () => {
+    const b = $('#atualizar'); b.disabled = true; b.textContent = 'Conferindo…';
+    try { await api('app.estado'); if (S.est.etapa === 'avaliacao') toast('Ainda não foi liberado. Avisamos você pelo WhatsApp.'); render(); }
+    catch (e) { b.disabled = false; b.textContent = 'Ver se já foi liberado'; toast('Sem conexão. Tente de novo.'); }
+  };
+  if ($('#sair')) $('#sair').onclick = () => sair(false);
+}
 
 /* ---------- casa ou academia ---------- */
 function telaLocal(primeira) {

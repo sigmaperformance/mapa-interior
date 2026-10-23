@@ -938,6 +938,7 @@ async function enviar(){
     const r=await fetch(CONFIG.ENDPOINT,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});
     const j=await r.json();if(!j.ok)throw new Error(j.erro||'erro');
     sent=true;if(st)st.textContent='Pronto. Suas respostas chegaram à equipe Sigma.';
+    try{if(new URLSearchParams(location.search).get('app')==='1'&&st&&!document.getElementById('voltaApp'))st.insertAdjacentHTML('afterend','<div class="actions" style="margin-top:14px"><a class="btn" id="voltaApp" href="app.html?c='+encodeURIComponent(CODE)+'" style="text-decoration:none">Voltar para o app</a></div>')}catch(e){}
     try{localStorage.removeItem('mmi_pendente')}catch(e){}
   }catch(err){
     if(st)st.textContent='Não conseguimos enviar agora. Confira a internet e toque em “Tentar enviar de novo”. Suas respostas estão guardadas neste aparelho.';
