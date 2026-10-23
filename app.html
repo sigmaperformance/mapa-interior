@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#72243E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Sigma">
+<meta name="robots" content="noindex">
+<title>App Sigma · 90 dias</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FBF3F5; --surface:#FFFFFF; --ink:#33202A; --muted:#7A6670; --line:#EAD9E0;
+  --rose:#72243E; --rose-soft:#F5DCE5; --on-rose:#FFF7FA;
+  --lav:#7E70C2; --lav-soft:#E9E4F7; --sage:#6F9180; --sage-soft:#DCE8E1;
+  --gold:#B08A44; --gold-soft:#F3E8CF; --crit:#C62F2F; --crit-soft:#FCE6E4;
+  --display:"Fraunces", Georgia, serif; --body:"Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --r:20px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#1A1115; --surface:#251A20; --ink:#F5E8EE; --muted:#B49DA8; --line:#3B2A33;
+  --rose:#E7A3BB; --rose-soft:#3D2430; --on-rose:#2A1019; --lav:#A99CE6; --lav-soft:#2C2740;
+  --sage:#93B8A4; --sage-soft:#1F2E27; --gold:#DDBB73; --gold-soft:#3A3020; --crit:#FF7B72; --crit-soft:#4A1F1F; color-scheme:dark}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.5 var(--body);-webkit-text-size-adjust:100%}
+button{font:inherit;color:inherit;cursor:pointer}
+.wrap{max-width:480px;margin:0 auto;padding:max(18px,env(safe-area-inset-top)) 16px calc(96px + env(safe-area-inset-bottom));min-height:100vh}
+h1,h2,h3{font-family:var(--display);font-weight:600;margin:0;letter-spacing:-.01em}
+h1{font-size:28px;line-height:1.15} h2{font-size:21px} h3{font-size:17px}
+.eyebrow{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:0 0 6px}
+.muted{color:var(--muted)} .small{font-size:13px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px;margin:14px 0}
+.card.hl{border-color:var(--rose);box-shadow:0 0 0 3px var(--rose-soft)}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:0;border-radius:999px;padding:15px 20px;background:var(--rose);color:var(--on-rose);font-weight:600;font-size:16px;min-height:52px}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+.btn.sm{width:auto;padding:10px 16px;min-height:40px;font-size:14px}
+.btn.danger{background:var(--crit);color:#fff}
+.link{background:none;border:0;color:var(--muted);text-decoration:underline;text-underline-offset:3px;padding:8px;font-size:14px}
+.field{width:100%;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:16px;padding:15px 16px;font:500 22px/1.2 var(--body);letter-spacing:.12em;text-align:center}
+.field:focus{outline:none;border-color:var(--rose)}
+.err{color:var(--crit);font-size:14px;min-height:20px;margin:10px 0 0;text-align:center}
+.center{text-align:center}
+.brand{font-family:var(--display);font-size:15px;color:var(--rose);font-weight:600;letter-spacing:.02em}
+.login{min-height:calc(100vh - 120px);display:flex;flex-direction:column;justify-content:center;gap:14px}
+.login p{margin:0}
+/* topo */
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.prog{height:8px;background:var(--rose-soft);border-radius:99px;position:relative;margin:12px 0 6px;overflow:hidden}
+.prog i{position:absolute;left:0;top:0;bottom:0;background:var(--rose);border-radius:99px}
+.marks{display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
+.chip{display:inline-block;font-size:12px;font-weight:600;padding:5px 10px;border-radius:999px;background:var(--gold-soft);color:var(--ink)}
+/* flor */
+.flor{display:block;margin:0 auto;width:100%;max-width:320px;height:auto}
+.legend{display:flex;flex-wrap:wrap;gap:6px 12px;justify-content:center;font-size:12px;color:var(--muted);margin-top:6px}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.legend b{width:9px;height:9px;border-radius:50%;display:inline-block}
+/* diário */
+.q{margin:14px 0 6px;font-weight:500}
+.dots{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.dot{border:1.5px solid var(--line);background:var(--surface);border-radius:14px;min-height:48px;font-weight:600;font-size:17px}
+.dot.on{background:var(--rose);border-color:var(--rose);color:var(--on-rose)}
+.ends{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:4px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.opt{border:1.5px solid var(--line);background:var(--surface);border-radius:14px;min-height:50px;padding:12px;font-weight:500;text-align:left}
+.opt.on{border-color:var(--rose);background:var(--rose-soft)}
+.saved{font-size:13px;color:var(--sage);margin-top:10px;min-height:18px}
+/* abas */
+.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);display:flex;justify-content:center;padding:6px 8px calc(6px + env(safe-area-inset-bottom));z-index:5}
+.tabs div{display:flex;max-width:480px;width:100%}
+.tab{flex:1;background:none;border:0;padding:8px 4px;font-size:12px;font-weight:500;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:3px;min-height:52px}
+.tab svg{width:22px;height:22px}
+.tab.on{color:var(--rose)}
+/* listas */
+.ex{display:flex;gap:12px;padding:14px 0;border-top:1px solid var(--line)}
+.ex:first-child{border-top:0}
+.ex .n{flex:none;width:30px;height:30px;border-radius:50%;background:var(--rose-soft);color:var(--rose);font-weight:600;display:flex;align-items:center;justify-content:center;font-size:14px}
+.ex p{margin:2px 0 0;font-size:14px;color:var(--muted)}
+.seg{display:flex;gap:6px;background:var(--rose-soft);padding:4px;border-radius:999px;margin:10px 0}
+.seg button{flex:1;border:0;background:none;border-radius:999px;padding:10px;font-weight:600;font-size:14px;color:var(--ink)}
+.seg button.on{background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.seg small{display:block;font-size:10px;font-weight:600;color:var(--rose);letter-spacing:.06em;text-transform:uppercase}
+ul.rules{margin:8px 0 0;padding-left:18px} ul.rules li{margin:4px 0}
+details{border-top:1px solid var(--line);padding:12px 0}
+details:first-of-type{border-top:0}
+summary{font-weight:600;cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:10px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";color:var(--muted);font-weight:400}
+details[open] summary::after{content:"–"}
+details p, details li{font-size:15px}
+.tag{display:inline-block;white-space:nowrap;flex:none;font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--rose);color:var(--on-rose);margin-left:6px;vertical-align:2px}
+.ori{background:var(--sage-soft);border-radius:16px;padding:14px 16px;margin:10px 0;font-size:15px}
+.timeline{display:flex;justify-content:space-between;margin:10px 0 4px}
+.timeline span{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--muted);background:var(--surface)}
+.timeline span.ok{background:var(--sage);border-color:var(--sage);color:#fff}
+.timeline span.due{border-color:var(--rose);color:var(--rose);box-shadow:0 0 0 3px var(--rose-soft)}
+table.cmp{width:100%;border-collapse:collapse;font-size:14px;margin-top:8px}
+table.cmp td{padding:8px 4px;border-top:1px solid var(--line)}
+table.cmp td.v{text-align:right;font-variant-numeric:tabular-nums;width:56px}
+.up{color:var(--sage);font-weight:600} .down{color:var(--crit);font-weight:600}
+.sos{width:100%;margin-top:18px;background:transparent;border:1.5px solid var(--crit);color:var(--crit);border-radius:999px;padding:13px;font-weight:600}
+/* sobreposições */
+.over{position:fixed;inset:0;background:var(--bg);z-index:20;overflow:auto}
+.over .wrap{padding-bottom:40px}
+.emerg{background:var(--crit);color:#fff;min-height:100vh}
+.emerg h1{color:#fff;font-size:30px}
+.emerg p{font-size:17px}
+.emerg .btn{background:#fff;color:var(--crit)}
+.emerg .btn.ghost{background:transparent;color:#fff;border-color:rgba(255,255,255,.6)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:30;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal .box{background:var(--surface);border-radius:var(--r);width:100%;max-width:420px;padding:14px}
+.vid{position:relative;width:100%;padding-top:177%;border-radius:14px;overflow:hidden;background:#000}
+.vid iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.toast{position:fixed;left:50%;bottom:92px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;font-size:14px;z-index:40;opacity:0;transition:.25s;pointer-events:none}
+.toast.on{opacity:1}
+.spin{width:22px;height:22px;border:3px solid var(--rose-soft);border-top-color:var(--rose);border-radius:50%;animation:sp 1s linear infinite;margin:30px auto}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion: reduce){.spin{animation:none}}
+.place{display:grid;gap:10px;margin-top:14px}
+.place button{text-align:left;border:1.5px solid var(--line);background:var(--surface);border-radius:var(--r);padding:16px}
+.place button.on{border-color:var(--rose);box-shadow:0 0 0 3px var(--rose-soft)}
+.place b{display:block;font-family:var(--display);font-size:18px;margin-bottom:4px}
+.place span{font-size:14px;color:var(--muted)}
+.bars{display:flex;align-items:flex-end;gap:2px;height:56px;margin-top:6px}
+.bars i{flex:1;background:var(--lav);border-radius:3px 3px 0 0;min-height:2px}
+.bars i.e{background:var(--gold)}
+.bars i.z{background:var(--line)}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+/* ============ CONFIGURAÇÃO ============ */
+const CONFIG = {
+  ENDPOINT: 'https://script.google.com/macros/s/AKfycbwmq-tI3jAYhoJt7lHlXCmOn0Y_A59dByE_9EUk3zuRubI4JLGVRVpsp0ZmsusJq1HK/exec',
+  WHATSAPP: '5531992130462'
+};
+
+/* ============ CONTEÚDO: TRILHA EM CASA (Nível Básico · TRX) ============ */
+const TREINOS = {
+  A: [
+    { nome: 'Agachamento assistido', reps: '10 a 15', ajuste: 'Ancoragem no meio (altura do peito). Segure as duas alças com os braços estendidos à frente.', video: 'it5EnCm4tec' },
+    { nome: 'Remada com pegada neutra', reps: '10 a 12', ajuste: 'Ancoragem alta (acima da cabeça). Palmas viradas uma para a outra.', video: '4TClQ848mh8' },
+    { nome: 'Flexão de braços em pé', reps: '10 a 12', ajuste: 'Ancoragem no meio (altura do peito). Corpo inclinado à frente, mãos nas alças.', video: '8IU1TdpORWA' },
+    { nome: 'Rosca bíceps', reps: '10 a 12', ajuste: 'Ancoragem no meio. Palmas viradas para cima, corpo inclinado para trás.', video: 'Xvk7ZSrIS58' },
+    { nome: 'Antirrotação em pé', reps: '8 a 10 de cada lado', ajuste: 'Ancoragem no meio, lateral ao corpo. Segure a fita com as duas mãos à frente do peito.', video: 'k-2DLPowXgg' }
+  ],
+  B: [
+    { nome: 'Agachamento aberto', reps: '10 a 15', ajuste: 'Ancoragem no meio. Pés afastados, pontas levemente para fora.', video: 'oAOtCIVdOEw' },
+    { nome: 'Remada alta', reps: '10 a 12', ajuste: 'Ancoragem alta. Puxe as fitas em direção ao rosto, afastando as mãos.', video: 'uxAlXA-VP-k' },
+    { nome: 'Adução horizontal dos braços', reps: '10 a 12', ajuste: 'Ancoragem alta. Braços abertos, corpo inclinado à frente.', video: 'BF3aiXDF9L4' },
+    { nome: 'Elevação de panturrilha', reps: '15 a 20', ajuste: 'Ancoragem no meio. Mãos nas alças apenas para apoio e equilíbrio.', video: 'l9636ayPZW8' },
+    { nome: 'Prancha lateral', reps: '20 a 30 segundos de cada lado', ajuste: 'Ancoragem baixa. Pés presos nas alças, corpo de lado.', video: 'iL1NePT2znU' }
+  ],
+  C: [
+    { nome: 'Agachamento com remada', reps: '10 a 12', ajuste: 'Ancoragem no meio. Combine o agachamento com a puxada das fitas.', video: 'xX-xWDMxSP0' },
+    { nome: 'Afundo reverso', reps: '8 a 10 de cada lado', ajuste: 'Ancoragem no meio. Segure as alças à frente do corpo com os braços estendidos.', video: 'qfvU1P4UI4A' },
+    { nome: 'Ponte de quadril com pé suspenso', reps: '10 a 15', ajuste: 'Ancoragem baixa (alças próximas ao chão). Calcanhares dentro dos apoios.', video: 'dDe3Y7hjefs' },
+    { nome: 'Elevação de braços em W', reps: '10 a 12', ajuste: 'Ancoragem no meio. Puxe os cotovelos para trás e para baixo, formando um W.', video: 'x_l4KSpfZVk' },
+    { nome: 'Pike na prancha (joelhos estendidos)', reps: '8 a 10', ajuste: 'Ancoragem baixa. Pés nas alças, mãos apoiadas no chão.', video: '17gltct-IhM' }
+  ]
+};
+const FASES = [
+  { n: 1, nome: 'Base', de: 1, ate: 30, treinos: ['A', 'B'], foco: 'Aprender os movimentos com segurança e criar o hábito.',
+    regras: ['Treinos A e B, alternando.', 'Dias 1 a 14: 2 voltas no circuito. Dias 15 a 30: 3 voltas.', 'Repetições: o número menor da faixa.', 'Corpo pouco inclinado no TRX: comece fácil.', 'Ritmo: 2 segundos para ir e 2 para voltar.', 'Descanso de 60 a 90 segundos entre as voltas.'] },
+  { n: 2, nome: 'Progressão', de: 31, ate: 60, treinos: ['A', 'B', 'C'], foco: 'Ganhar força, deixando cada treino um pouco mais desafiador.',
+    regras: ['Treinos A, B e C, em sequência.', '3 voltas no circuito.', 'Repetições: o número maior da faixa.', 'Mais inclinação no TRX: mude a posição dos pés para deixar o exercício mais difícil.', 'Desça em 3 segundos, sem pressa.', 'Descanso de 60 segundos entre as voltas.'] },
+  { n: 3, nome: 'Consolidação', de: 61, ate: 90, treinos: ['A', 'B', 'C'], foco: 'Firmar a força conquistada e fazer o hábito ser seu.',
+    regras: ['Treinos A, B e C, em sequência.', '3 voltas no circuito.', 'Segure 1 a 2 segundos na posição mais difícil de cada exercício.', 'Descanso de 45 segundos entre as voltas.', 'Dias 85 a 90: refaça o Treino A como no dia 1 e perceba a diferença.'] }
+];
+
+/* ============ CONTEÚDO: GUIA DO MÉTODO SIGMA (academia) ============ */
+const GUIA = [
+  { t: 'Como usar este guia', h: '<p>Na academia você monta o seu treino com estes princípios. Não é uma ficha de musculação: é o jeito Sigma de dosar o esforço, progredir e recuperar. Leve o guia com você e, se tiver dúvida sobre um aparelho, peça ajuda ao professor da academia para a técnica.</p>' },
+  { t: 'Sua semana', h: '<ul class="rules"><li><b>Força:</b> 2 a 3 vezes, em dias não seguidos.</li><li><b>Fôlego e disposição:</b> 2 vezes, de 30 a 40 minutos.</li><li><b>Tiros curtos:</b> 1 vez, a partir do dia 31.</li><li><b>Pelo menos 1 dia leve</b>, só com caminhada ou alongamento.</li><li>Nos dias em casa, use a trilha com o TRX, mais abaixo.</li></ul>' },
+  { t: 'Força: o que entra em cada treino', h: '<p>Escolha um exercício de cada grupo:</p><ul class="rules"><li><b>Agachar:</b> agachamento, leg press, cadeira extensora.</li><li><b>Dobrar o quadril:</b> levantamento terra romeno, elevação de quadril, mesa flexora.</li><li><b>Empurrar:</b> supino, flexão de braços, desenvolvimento.</li><li><b>Puxar:</b> remada, puxada na frente.</li><li><b>Estabilizar:</b> prancha, caminhada carregando peso.</li></ul>' },
+  { t: 'Intensidade: a regra das repetições sobrando', fase: true, h: '<p>Termine cada série sentindo que ainda faria mais algumas repetições <b>com boa técnica</b>. É essa folga que controla o esforço, mais do que o peso em si.</p>' },
+  { t: 'Quando aumentar a carga', h: '<p>Se você completou todas as séries no número maior de repetições, com a folga certa, <b>em dois treinos seguidos</b>, aumente a carga o mínimo possível: 1 a 2 kg, ou um furo na máquina. Se a técnica piorar, volte para a carga anterior.</p>' },
+  { t: 'Fôlego e disposição', h: '<p>Caminhada rápida, bicicleta ou elíptico, num ritmo em que dá para conversar, mas não para cantar. Numa escala de 0 a 10, um esforço de 5 a 6.</p>' },
+  { t: 'Tiros curtos (a partir do dia 31)', h: '<p>Uma vez por semana, depois de aquecer de 5 a 10 minutos: 4 a 6 tiros de 20 a 30 segundos bem fortes (esforço 9 de 10), na bicicleta ou numa subida, com 2 minutos leves entre eles. Comece com 4.</p>' },
+  { t: 'Impacto para os ossos (a partir do dia 31)', h: '<p>Duas vezes por semana, antes da força: 10 a 20 saltos baixos (saltitos no lugar ou corda leve), aumentando aos poucos até 30 a 40.</p><p><b>Pule esta parte</b> se você perde urina ao pular, se sente dor nas articulações ao saltar ou se foi orientada a evitar impacto. Os exercícios de força continuam protegendo os seus ossos.</p>' },
+  { t: 'Respiração', h: '<p>Solte o ar na hora do esforço e não prenda a respiração para levantar a carga. Isso protege a pressão e o assoalho pélvico.</p>' },
+  { t: 'Recuperação', h: '<ul class="rules"><li>Dormir bem faz parte do treino.</li><li>Dê 48 horas entre treinos de força do mesmo grupo.</li><li>Sinais de excesso: cansaço que não passa em 2 dias, sono pior ou dor que aumenta. Se aparecerem, faça uma semana mais leve, com metade das séries.</li></ul>' },
+  { t: 'Quando parar', h: '<p>Dor ou aperto no peito, falta de ar fora do normal, tontura ou dor forte numa articulação: pare na hora e toque em <b>Senti algo estranho</b>, na tela Hoje.</p>' }
+];
+const GUIA_FASE = {
+  1: '<b>Fase Base (dias 1 a 30):</b> 2 séries de 10 a 12 repetições, sobrando 3 a 4. Esforço de 6 em 10. O foco é aprender a técnica.',
+  2: '<b>Fase Progressão (dias 31 a 60):</b> 3 séries de 8 a 10 repetições, sobrando 2 a 3. Esforço de 7 a 8 em 10.',
+  3: '<b>Fase Consolidação (dias 61 a 90):</b> 3 a 4 séries de 6 a 8 repetições nos exercícios principais, sobrando 1 a 2. Esforço de 8 a 9 em 10, sempre com técnica impecável.'
+};
+
+/* ============ FLOR ============ */
+const PETALAS = [
+  { k: 'sono', n: 'Sono', c: '#7E70C2', freq: 'diário' },
+  { k: 'energia', n: 'Energia', c: '#B08A44', freq: 'diário' },
+  { k: 'movimento', n: 'Movimento', c: '#72243E', freq: 'diário' },
+  { k: 'calor', n: 'Temperatura', c: '#C9796B', freq: 'quinzenal' },
+  { k: 'clareza', n: 'Clareza', c: '#4F8A9C', freq: 'quinzenal' },
+  { k: 'humor', n: 'Humor', c: '#6F9180', freq: 'quinzenal' }
+];
+function petalPath(L, w) { return `M0,0 C${w},${-L * .32} ${w},${-L * .78} 0,${-L} C${-w},${-L * .78} ${-w},${-L * .32} 0,0Z`; }
+function florSVG(vals, outline, opts) {
+  opts = opts || {};
+  const N = PETALAS.length, len = v => 34 + (v ?? 0) * 9.2, wid = v => 15 + (v ?? 0) * 1.7;
+  let s = '';
+  [50, 90, 130].forEach(r => s += `<circle r="${r}" fill="none" stroke="var(--line)" stroke-dasharray="2 5"/>`);
+  PETALAS.forEach((p, i) => {
+    const ang = i * 360 / N, v = vals ? vals[p.k] : null;
+    if (v != null) s += `<path transform="rotate(${ang})" d="${petalPath(len(v), wid(v))}" fill="${p.c}" fill-opacity=".85" stroke="var(--surface)" stroke-width="1.5"/>`;
+    else s += `<path transform="rotate(${ang})" d="${petalPath(34, 15)}" fill="none" stroke="var(--muted)" stroke-dasharray="3 3"/>`;
+    const o = outline ? outline[p.k] : null;
+    if (o != null) s += `<path transform="rotate(${ang})" d="${petalPath(len(o), wid(o))}" fill="none" stroke="var(--ink)" stroke-opacity=".55" stroke-width="1.4" stroke-dasharray="4 4"/>`;
+  });
+  s += '<circle r="13" fill="var(--gold)"/><circle r="13" fill="none" stroke="var(--surface)" stroke-width="3"/>';
+  if (!opts.semRotulo) PETALAS.forEach((p, i) => {
+    const rad = (i * 360 / N - 90) * Math.PI / 180, R = 152, x = Math.cos(rad) * R, y = Math.sin(rad) * R;
+    const anc = x > 12 ? 'start' : x < -12 ? 'end' : 'middle', v = vals ? vals[p.k] : null;
+    s += `<text x="${x.toFixed(1)}" y="${(y).toFixed(1)}" text-anchor="${anc}" font-size="13" font-weight="600" fill="var(--ink)" font-family="Inter,sans-serif">${p.n}</text>`;
+    s += `<text x="${x.toFixed(1)}" y="${(y + 15).toFixed(1)}" text-anchor="${anc}" font-size="12" fill="var(--muted)" font-family="Inter,sans-serif">${v == null ? '—' : fmt1(v)}</text>`;
+  });
+  return `<svg class="flor" viewBox="${opts.semRotulo ? '-145 -145 290 290' : '-205 -185 410 370'}" role="img" aria-label="${esc(opts.aria || 'Sua flor')}">${s}</svg>`;
+}
+
+/* ============ ESTADO E ARMAZENAMENTO ============ */
+const LS = {
+  get(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+  del(k) { try { localStorage.removeItem(k); } catch (e) {} }
+};
+const S = { sessao: LS.get('sigma_app_sessao'), est: LS.get('sigma_app_estado'), tela: 'hoje', treinoSel: null, login: { etapa: 'codigo', codigo: LS.get('sigma_app_codigo') || '' }, over: null };
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const fmt1 = v => (Math.round(v * 10) / 10).toString().replace('.', ',');
+let toastT; function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 2400); }
+const zap = msg => `https://wa.me/${CONFIG.WHATSAPP}?text=${encodeURIComponent(msg)}`;
+const dataBR = iso => iso ? iso.split('-').reverse().join('/') : '';
+
+async function api(acao, dados) {
+  const corpo = Object.assign({ acao, sessao: S.sessao }, dados || {});
+  const r = await fetch(CONFIG.ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(corpo) });
+  const j = await r.json();
+  if (!j.ok && (j.erro === 'sessao' || j.erro === 'nao_liberada') && acao !== 'app.entrar') { sair(true, j.erro); throw new Error(j.erro); }
+  if (j.estado) { S.est = j.estado; LS.set('sigma_app_estado', j.estado); }
+  return j;
+}
+function sair(silencioso, motivo) {
+  if (!silencioso && S.sessao) api('app.sair').catch(() => {});
+  S.sessao = null; S.est = null; LS.del('sigma_app_sessao'); LS.del('sigma_app_estado');
+  S.login = { etapa: 'codigo', codigo: S.login.codigo || '', erro: motivo === 'nao_liberada' ? 'Seu acesso está pausado ou encerrado. Fale com a equipe.' : motivo === 'sessao' ? 'Sua sessão terminou. Entre de novo.' : '' };
+  S.over = null; render();
+}
+
+/* ============ REGRAS DO PROGRAMA ============ */
+function fase(dia) { const d = Math.max(1, Math.min(90, dia || 1)); return FASES.find(f => d >= f.de && d <= f.ate); }
+function proximoTreino(est) {
+  const f = fase(est.dia);
+  const feitos = (est.diario || []).filter(x => x.t === 1 && x.p >= f.de && x.p <= f.ate).length;
+  return f.treinos[feitos % f.treinos.length];
+}
+function treinosNaSemana(est) {
+  const hoje = est.hoje ? est.hoje.d : null, lst = est.diario || [];
+  if (!lst.length) return 0;
+  const ref = hoje || lst[lst.length - 1].d;
+  const ms = s => Date.UTC(+s.slice(0, 4), +s.slice(5, 7) - 1, +s.slice(8, 10));
+  return lst.filter(x => x.t === 1 && (ms(ref) - ms(x.d)) / 864e5 < 7).length;
+}
+
+/* ============ RENDER ============ */
+function render() {
+  const app = $('#app');
+  if (!S.sessao || !S.est) { app.innerHTML = telaLogin(); ligarLogin(); return; }
+  if (!S.est.local) { app.innerHTML = `<div class="wrap">${telaLocal(true)}</div>`; ligarLocal(); return; }
+  const telas = { hoje: telaHoje, treinos: telaTreinos, evolucao: telaEvolucao, perfil: telaPerfil };
+  app.innerHTML = `<div class="wrap">${telas[S.tela]()}</div>${abas()}${S.over ? sobreposicao() : ''}`;
+  ligarComum();
+}
+
+function abas() {
+  const ic = {
+    hoje: '<path d="M12 3a9 9 0 1 0 9 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="3" fill="currentColor"/>',
+    treinos: '<path d="M4 9v6M20 9v6M7 7v10M17 7v10M7 12h10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+    evolucao: '<path d="M4 18l5-6 4 3 7-9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+    perfil: '<circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'
+  };
+  const nm = { hoje: 'Hoje', treinos: 'Treinos', evolucao: 'Evolução', perfil: 'Perfil' };
+  return `<nav class="tabs" aria-label="Seções"><div>${Object.keys(nm).map(k => `<button class="tab ${S.tela === k ? 'on' : ''}" data-tab="${k}" ${S.tela === k ? 'aria-current="page"' : ''}><svg viewBox="0 0 24 24" aria-hidden="true">${ic[k]}</svg>${nm[k]}</button>`).join('')}</div></nav>`;
+}
+
+/* ---------- login ---------- */
+function telaLogin() {
+  const L = S.login;
+  let corpo = '';
+  if (L.etapa === 'codigo') corpo = `
+    <h1>Seu acompanhamento de 90 dias</h1>
+    <p class="muted">Digite o código que a equipe Sigma enviou para você.</p>
+    <input class="field" id="cod" maxlength="6" autocomplete="username" autocapitalize="characters" placeholder="ANA-01" value="${esc(L.codigo)}" aria-label="Seu código">
+    <button class="btn" id="go">Continuar</button>`;
+  else if (L.etapa === 'senha') corpo = `
+    <p class="eyebrow">Código ${esc(L.codigo)}</p>
+    <h1>Digite sua senha</h1>
+    <input class="field" id="pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="current-password" placeholder="••••••" aria-label="Senha de 6 números">
+    <button class="btn" id="go">Entrar</button>
+    <a class="link center" href="${zap('Oi! Esqueci minha senha do app Sigma. Meu código é ' + L.codigo + '.')}" target="_blank" rel="noopener">Esqueci minha senha</a>
+    <button class="link" id="back">Usar outro código</button>`;
+  else if (L.etapa === 'criar') corpo = `
+    <p class="eyebrow">Código ${esc(L.codigo)} · primeiro acesso</p>
+    <h1>Crie uma senha de 6 números</h1>
+    <p class="muted">Ela protege os seus registros. Evite datas de aniversário e sequências como 123456.</p>
+    <input class="field" id="pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="new-password" placeholder="Senha" aria-label="Nova senha">
+    <input class="field" id="pin2" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="new-password" placeholder="Repita a senha" aria-label="Repita a senha">
+    <button class="btn" id="go">Criar senha e entrar</button>
+    <button class="link" id="back">Usar outro código</button>`;
+  return `<div class="wrap"><div class="login"><p class="brand">Sigma Mulher 35+</p>${corpo}<p class="err" id="err" role="alert">${esc(L.erro || '')}</p>
+    ${L.etapa === 'codigo' && L.erro && /liberado|pausado/.test(L.erro) ? `<a class="btn ghost" href="${zap('Oi! Quero acessar o app Sigma. Meu código é ' + (L.codigo || '') + '.')}" target="_blank" rel="noopener">Falar com a equipe</a>` : ''}</div></div>`;
+}
+function ligarLogin() {
+  const L = S.login, go = $('#go'), err = $('#err');
+  const ocupado = b => { go.disabled = b; go.textContent = b ? 'Aguarde…' : go.dataset.t; };
+  go.dataset.t = go.textContent;
+  if ($('#back')) $('#back').onclick = () => { S.login = { etapa: 'codigo', codigo: '' }; render(); };
+  const cod = $('#cod');
+  if (cod) {
+    cod.oninput = () => { let v = cod.value.toUpperCase().replace(/[^A-Z0-9]/g, ''); if (v.length > 3) v = v.slice(0, 3) + '-' + v.slice(3, 5); cod.value = v; };
+    cod.onkeydown = e => { if (e.key === 'Enter') go.click(); };
+    setTimeout(() => cod.focus(), 50);
+  }
+  const pin = $('#pin'); if (pin) { pin.oninput = () => pin.value = pin.value.replace(/\D/g, '').slice(0, 6); pin.onkeydown = e => { if (e.key === 'Enter') go.click(); }; setTimeout(() => pin.focus(), 50); }
+  const pin2 = $('#pin2'); if (pin2) { pin2.oninput = () => pin2.value = pin2.value.replace(/\D/g, '').slice(0, 6); pin2.onkeydown = e => { if (e.key === 'Enter') go.click(); }; }
+  go.onclick = async () => {
+    err.textContent = '';
+    const msg = j => ({
+      codigo: 'Confira o código. Ele tem 3 letras, um traço e 2 números.',
+      nao_liberada: 'Seu acesso ainda não foi liberado. Se você já contratou, fale com a equipe.',
+      bloqueada: `Muitas tentativas. Tente de novo em ${j.minutos} minuto${j.minutos > 1 ? 's' : ''}.`,
+      senha: `Senha incorreta. ${j.restantes} tentativa${j.restantes > 1 ? 's' : ''} antes de um bloqueio de 15 minutos.`,
+      senha_formato: 'A senha precisa ter exatamente 6 números.',
+      senha_fraca: 'Escolha uma senha menos óbvia: evite números repetidos ou em sequência.'
+    }[j.erro] || 'Não conseguimos conectar. Confira a internet e tente de novo.');
+    try {
+      if (L.etapa === 'codigo') {
+        const c = cod.value.trim().toUpperCase();
+        if (!/^[A-Z]{3}-\d{2}$/.test(c)) { err.textContent = msg({ erro: 'codigo' }); return; }
+        ocupado(true); L.codigo = c; LS.set('sigma_app_codigo', c);
+        const j = await api('app.entrar', { codigo: c });
+        if (!j.ok) { L.erro = msg(j); ocupado(false); render(); return; }
+        L.erro = ''; L.etapa = j.criarSenha ? 'criar' : 'senha'; render(); return;
+      }
+      if (L.etapa === 'senha') {
+        if (!/^\d{6}$/.test(pin.value)) { err.textContent = msg({ erro: 'senha_formato' }); return; }
+        ocupado(true);
+        const j = await api('app.entrar', { codigo: L.codigo, senha: pin.value });
+        if (!j.ok) { err.textContent = msg(j); ocupado(false); pin.value = ''; pin.focus(); return; }
+        entrou(j); return;
+      }
+      if (L.etapa === 'criar') {
+        if (!/^\d{6}$/.test(pin.value)) { err.textContent = msg({ erro: 'senha_formato' }); return; }
+        if (pin.value !== pin2.value) { err.textContent = 'As duas senhas não são iguais.'; return; }
+        ocupado(true);
+        const j = await api('app.entrar', { codigo: L.codigo, novaSenha: pin.value });
+        if (!j.ok) { err.textContent = msg(j); ocupado(false); return; }
+        entrou(j); return;
+      }
+    } catch (e) { err.textContent = msg({}); ocupado(false); }
+  };
+}
+function entrou(j) { S.sessao = j.sessao; LS.set('sigma_app_sessao', j.sessao); S.est = j.estado; LS.set('sigma_app_estado', j.estado); S.tela = 'hoje'; render(); }
+
+/* ---------- casa ou academia ---------- */
+function telaLocal(primeira) {
+  const l = S.est.local;
+  return `${primeira ? '<p class="brand">Sigma Mulher 35+</p>' : ''}
+  <h1 style="margin-top:12px">Onde você vai treinar?</h1>
+  <p class="muted">O método é o mesmo. Muda só o formato do treino. Você pode trocar depois, no Perfil.</p>
+  <div class="place">
+    <button data-local="casa" class="${l === 'casa' ? 'on' : ''}"><b>Em casa, com o TRX</b><span>Treinos prontos no app, com vídeos e a progressão dos 90 dias.</span></button>
+    <button data-local="academia" class="${l === 'academia' ? 'on' : ''}"><b>Na academia</b><span>O guia do Método Sigma para você aplicar no treino da academia: intensidade, progressão e recuperação. Não é uma ficha de musculação. O TRX vai junto e a trilha de treinos em casa fica liberada para os dias em que você não for à academia.</span></button>
+  </div>`;
+}
+function ligarLocal() {
+  document.querySelectorAll('[data-local]').forEach(b => b.onclick = async () => {
+    b.disabled = true;
+    try { await api('app.local', { local: b.dataset.local }); toast('Pronto. Seu formato de treino foi salvo.'); render(); }
+    catch (e) { b.disabled = false; toast('Sem conexão. Tente de novo.'); }
+  });
+}
+
+/* ---------- hoje ---------- */
+function telaHoje() {
+  const e = S.est, dia = e.dia;
+  if (dia != null && dia < 1) return `<p class="brand">Sigma Mulher 35+</p><div class="card"><h2>Seu programa começa em ${dataBR(e.liberadaEm)}</h2><p class="muted">No dia 1, esta tela mostra seu diário, seu treino e sua flor.</p></div>`;
+  const d = Math.min(dia, 90), f = fase(d), h = e.hoje || {};
+  const pt = proximoTreino(e), sem = treinosNaSemana(e);
+  const marcos = [15, 30, 45, 60, 75, 90];
+  const diaLbl = e.fim ? 'Programa concluído' : `Dia ${d} de 90`;
+  const ck = e.checkin && e.checkin.devido;
+  return `
+  <div class="top"><div><p class="eyebrow">${esc(diaLbl)}</p><h1>Oi${e.nome ? ', ' + esc(e.nome) : ''}</h1></div><span class="chip">Fase ${f.n} · ${f.nome}</span></div>
+  <div class="prog" aria-hidden="true"><i style="width:${(d / 90 * 100).toFixed(1)}%"></i></div>
+  <div class="marks" aria-hidden="true"><span>1</span>${marcos.map(m => `<span>${m}</span>`).join('')}</div>
+  ${e.fim ? `<div class="card hl"><h2>Você completou os 90 dias</h2><p class="muted">Veja na aba Evolução como a sua flor mudou desde o dia 1.</p><button class="btn" data-tab="evolucao">Ver minha evolução</button></div>` : ''}
+  ${ck ? `<div class="card hl"><p class="eyebrow">Check-in ${e.checkin.numero} de 6</p><h2>Como foi a sua quinzena?</h2><p class="muted">Seis perguntas, cerca de 1 minuto. Você recebe as orientações da equipe na hora.</p><button class="btn" id="abrirCk">Fazer o check-in</button></div>` : ''}
+  <div class="card">
+    <p class="eyebrow">Sua flor agora</p>
+    ${florSVG(e.flor.atual, e.flor.inicial, { aria: 'Sua flor de hoje, com o contorno do dia 1' })}
+    <p class="small muted center" style="margin:4px 0 0">Quanto maior a pétala, melhor. ${e.flor.inicial ? 'O contorno tracejado mostra como você estava no dia 1.' : ''}</p>
+    <p class="small muted center" style="margin:4px 0 0">Sono, energia e movimento mudam com o diário. Temperatura, clareza e humor, a cada check-in.</p>
+  </div>
+  <div class="card" id="diario">
+    <p class="eyebrow">Diário de hoje · 3 toques</p>
+    <p class="q">Como você dormiu?</p>
+    <div class="dots" role="group" aria-label="Sono de 1 a 5">${[1, 2, 3, 4, 5].map(v => `<button class="dot ${h.s === v ? 'on' : ''}" data-d="sono" data-v="${v}" aria-pressed="${h.s === v}">${v}</button>`).join('')}</div>
+    <div class="ends"><span>Muito mal</span><span>Muito bem</span></div>
+    <p class="q">Como está a sua energia?</p>
+    <div class="dots" role="group" aria-label="Energia de 1 a 5">${[1, 2, 3, 4, 5].map(v => `<button class="dot ${h.e === v ? 'on' : ''}" data-d="energia" data-v="${v}" aria-pressed="${h.e === v}">${v}</button>`).join('')}</div>
+    <div class="ends"><span>Sem energia</span><span>Cheia de energia</span></div>
+    <p class="q">Você treinou hoje?</p>
+    <div class="two"><button class="opt ${h.t === 1 ? 'on' : ''}" data-d="treinou" data-v="1">Sim</button><button class="opt ${h.t === 0 ? 'on' : ''}" data-d="treinou" data-v="0">Ainda não</button></div>
+    <p class="saved" id="saved">${h.s && h.e && h.t != null ? 'Diário de hoje salvo. Você pode mudar até o fim do dia.' : ''}</p>
+  </div>
+  <div class="card">
+    <p class="eyebrow">Treino</p>
+    ${e.local === 'academia'
+      ? `<h3>Dia de academia ou de casa?</h3><p class="muted small">Na academia, siga o guia do Método Sigma da sua fase. Em casa, o próximo treino com o TRX é o <b>${pt}</b>.</p>`
+      : `<h3>Próximo treino: ${pt}</h3><p class="muted small">5 exercícios · ${d <= 14 ? '2 voltas' : '3 voltas'} · cerca de 20 minutos</p>`}
+    <p class="small" style="margin:8px 0 12px">Nesta semana: <b>${sem} de 3</b> treinos</p>
+    <button class="btn ghost" data-tab="treinos">Abrir treinos</button>
+  </div>
+  <button class="sos" id="sos">Senti algo estranho</button>`;
+}
+
+/* ---------- treinos ---------- */
+function telaTreinos() {
+  const e = S.est, d = Math.max(1, Math.min(e.dia || 1, 90)), f = fase(d), pt = proximoTreino(e);
+  const sel = S.treinoSel && f.treinos.includes(S.treinoSel) ? S.treinoSel : pt;
+  const trilha = `
+    <div class="card">
+      <p class="eyebrow">Fase ${f.n} de 3 · dias ${f.de} a ${f.ate}</p>
+      <h2>${f.nome}</h2>
+      <p class="muted" style="margin:6px 0 0">${f.foco}</p>
+      <ul class="rules">${f.regras.map(r => `<li>${r}</li>`).join('')}</ul>
+      <p class="small muted" style="margin-top:10px">Meta: 3 treinos por semana, com um dia de descanso entre eles.</p>
+    </div>
+    <div class="seg" role="tablist">${f.treinos.map(t => `<button role="tab" class="${t === sel ? 'on' : ''}" data-treino="${t}" aria-selected="${t === sel}">Treino ${t}${t === pt ? '<small>Próximo</small>' : ''}</button>`).join('')}</div>
+    <div class="card">
+      <p class="eyebrow">Circuito · ${d <= 14 ? '2 voltas' : '3 voltas'}</p>
+      ${TREINOS[sel].map((x, i) => `<div class="ex"><span class="n">${i + 1}</span><div style="flex:1"><h3>${esc(x.nome)}</h3><p><b>${esc(x.reps)}</b> · ${esc(x.ajuste)}</p><button class="btn ghost sm" style="margin-top:8px" data-video="${x.video}" data-nome="${esc(x.nome)}">Ver vídeo</button></div></div>`).join('')}
+    </div>
+    <button class="btn" id="fiz">Concluí este treino</button>
+    <p class="small muted center" style="margin-top:10px">Se sentir dor que não passa, tontura ou falta de ar, pare e toque em <b>Senti algo estranho</b>, na tela Hoje.</p>`;
+  if (e.local !== 'academia') return `<h1>Treinos em casa</h1>${trilha}`;
+  return `<h1>Treinos</h1>
+    <div class="card">
+      <p class="eyebrow">Método Sigma · para a academia</p>
+      <h2>Seu guia de treino</h2>
+      ${GUIA.map((g, i) => `<details ${i === 0 || g.fase ? 'open' : ''}><summary>${g.t}${g.fase ? '<span class="tag">Sua fase</span>' : ''}</summary>${g.h}${g.fase ? `<div class="ori">${GUIA_FASE[f.n]}</div>` : ''}</details>`).join('')}
+      <p class="small muted" style="margin-top:10px">Guia educativo e padronizado do Método Sigma. Ele não substitui uma avaliação individual.</p>
+    </div>
+    <button class="btn" id="fiz">Treinei hoje</button>
+    <h2 style="margin:26px 0 0">Para os dias em casa</h2>
+    <p class="muted small" style="margin:4px 0 0">A trilha com o TRX, na mesma fase do seu programa.</p>
+    ${trilha}`;
+}
+
+/* ---------- evolução ---------- */
+function telaEvolucao() {
+  const e = S.est, ini = e.flor.inicial, at = e.flor.atual, d = Math.min(e.dia || 1, 90);
+  const ult = (e.diario || []).slice(-30);
+  const barras = (k, cls) => `<div class="bars" aria-hidden="true">${ult.map(x => { const v = x[k]; return `<i class="${v == null ? 'z' : cls}" style="height:${v == null ? 4 : v * 20}%"></i>`; }).join('')}</div>`;
+  const total = (e.diario || []).filter(x => x.t === 1).length, meta = Math.max(1, Math.round(d / 7 * 3));
+  const feitos = Object.fromEntries((e.checkins || []).map(c => [c.n, c]));
+  return `<h1>Sua evolução</h1>
+  <div class="card">
+    <div class="two">
+      <div class="center"><p class="eyebrow">Dia 1</p>${ini ? florSVG(ini, null, { semRotulo: true, aria: 'Flor do dia 1' }) : '<p class="small muted">Aparece quando a sua avaliação inicial estiver ligada ao app.</p>'}</div>
+      <div class="center"><p class="eyebrow">${e.fim ? 'Dia 90' : 'Hoje'}</p>${florSVG(at, null, { semRotulo: true, aria: 'Flor de hoje' })}</div>
+    </div>
+    <div class="legend">${PETALAS.map(p => `<span><b style="background:${p.c}"></b>${p.n}</span>`).join('')}</div>
+    <table class="cmp"><tbody>${PETALAS.map(p => { const a = ini ? ini[p.k] : null, b = at[p.k]; const df = a != null && b != null ? b - a : null;
+      return `<tr><td>${p.n}</td><td class="v muted">${a == null ? '—' : fmt1(a)}</td><td class="v"><b>${b == null ? '—' : fmt1(b)}</b></td><td class="v ${df > 0.4 ? 'up' : df < -0.4 ? 'down' : 'muted'}">${df == null ? '' : (df > 0 ? '+' : '') + fmt1(df)}</td></tr>`; }).join('')}</tbody></table>
+    <p class="small muted" style="margin:8px 0 0">Notas de 0 a 10. Quanto maior, melhor.</p>
+  </div>
+  <div class="card">
+    <p class="eyebrow">Diário · ${ult.length === 1 ? 'primeiro registro' : 'últimos ' + ult.length + ' registros'}</p>
+    ${ult.length ? `<p class="q" style="margin-top:4px">Sono</p>${barras('s', '')}<p class="q">Energia</p>${barras('e', 'e')}` : '<p class="muted small">Seu diário aparece aqui depois dos primeiros registros.</p>'}
+  </div>
+  <div class="card">
+    <p class="eyebrow">Treinos</p>
+    <h2>${total} treino${total === 1 ? '' : 's'} feito${total === 1 ? '' : 's'}</h2>
+    <p class="muted small" style="margin:4px 0 0">A meta até hoje seria cerca de ${meta}. O que conta é voltar sempre.</p>
+  </div>
+  <div class="card">
+    <p class="eyebrow">Check-ins da quinzena</p>
+    <div class="timeline">${[1, 2, 3, 4, 5, 6].map(n => `<span class="${feitos[n] ? 'ok' : e.checkin && e.checkin.devido && e.checkin.numero === n ? 'due' : ''}" title="Dia ${n * 15}">${n * 15}</span>`).join('')}</div>
+    ${(e.checkins || []).slice().reverse().map(c => `<details><summary>Check-in ${c.n} · dia ${c.dia}</summary>${c.orientacoes.map(o => `<div class="ori">${esc(o)}</div>`).join('')}</details>`).join('') || '<p class="muted small">O primeiro check-in chega no dia 15.</p>'}
+  </div>`;
+}
+
+/* ---------- perfil ---------- */
+function telaPerfil() {
+  const e = S.est;
+  return `<h1>Perfil</h1>
+  <div class="card"><p class="eyebrow">Seu código</p><h2>${esc(e.codigo)}</h2><p class="muted small" style="margin:4px 0 0">Programa iniciado em ${dataBR(e.liberadaEm)}</p></div>
+  <div class="card">${telaLocal(false)}</div>
+  <div class="card"><p class="eyebrow">Equipe Sigma</p><p style="margin:0 0 12px">Dúvidas sobre o programa, o TRX ou o app.</p><a class="btn ghost" href="${zap('Oi! Sou a aluna ' + e.codigo + ' do app Sigma.')}" target="_blank" rel="noopener">Falar pelo WhatsApp</a></div>
+  <div class="card"><p class="eyebrow">Seus dados</p><p class="small" style="margin:0">Seus registros ficam guardados na conta da Sigma, ligados ao seu código, e só a equipe Sigma tem acesso. Eles são usados para acompanhar o seu programa. Se esquecer a senha, a equipe apaga a antiga e você cria outra.</p></div>
+  <button class="btn ghost" id="sair">Sair deste aparelho</button>`;
+}
+
+/* ---------- sobreposições: check-in, alerta, emergência, vídeo ---------- */
+const CK = [
+  { k: 'calor', q: 'Nestes 15 dias, como ficaram os calores e suores?', o: ['Não tenho ou sumiram', 'Leves', 'Incomodam', 'Muito fortes'] },
+  { k: 'clareza', q: 'E a sua clareza mental, como memória e foco?', o: ['Muito boa', 'Boa', 'Oscilando', 'Ruim'] },
+  { k: 'humor', q: 'Como esteve o seu humor?', o: ['Leve', 'Estável', 'Oscilando', 'Muito difícil'] },
+  { k: 'dor', q: 'Alguma dor atrapalhou os treinos?', o: ['Não', 'Leve, deu para treinar', 'Sim, atrapalhou'] },
+  { k: 'atrapalhou', q: 'O que mais atrapalhou a sua rotina?', o: ['Nada', 'Falta de tempo', 'Cansaço', 'Desânimo', 'Dor', 'Outra coisa'] },
+  { k: 'seguranca', q: 'Nestes 15 dias, você teve dor no peito, falta de ar forte, desmaio ou alguma queda?', o: ['Não', 'Sim'] }
+];
+const MOTIVOS = [
+  ['peito', 'Dor ou aperto no peito'], ['ar', 'Falta de ar fora do normal'], ['desmaio', 'Desmaio ou tontura forte'], ['queda', 'Tive uma queda'], ['dor_forte', 'Dor forte que não passa']
+];
+const EMERG = {
+  cardio: { t: 'Pare o exercício agora e sente-se.', p: ['Se a dor no peito, a falta de ar ou a tontura estiverem acontecendo agora, <b>ligue 192 (SAMU)</b> ou vá ao pronto atendimento mais próximo. Não espere passar sozinha.', 'Não volte a treinar antes de ser avaliada por um médico.'] },
+  queda: { t: 'Depois de uma queda, vá com calma.', p: ['Se você bateu a cabeça, sente dor forte, não consegue apoiar o peso ou mexer a região, <b>ligue 192</b> ou procure atendimento agora.', 'Se foi leve, descanse hoje e não treine até a dor passar.'] },
+  dor_forte: { t: 'Pare o exercício e não force a região.', p: ['Se a dor for intensa, vier com inchaço, deformidade ou formigamento, procure atendimento.', 'Não treine essa região até ser avaliada.'] }
+};
+function sobreposicao() {
+  const o = S.over;
+  if (o.tipo === 'video') return `<div class="modal" id="modal"><div class="box"><div class="vid"><iframe src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(o.id)}?rel=0&playsinline=1" title="Vídeo: ${esc(o.nome)}" allow="encrypted-media; picture-in-picture" allowfullscreen></iframe></div><button class="btn ghost" style="margin-top:12px" id="fechar">Fechar</button></div></div>`;
+  if (o.tipo === 'sos') return `<div class="over"><div class="wrap"><p class="eyebrow">Segurança</p><h1>O que aconteceu?</h1><p class="muted">Escolha o que mais se parece com o que você sentiu.</p><div class="place">${MOTIVOS.map(m => `<button data-motivo="${m[0]}"><b style="font-size:17px;margin:0">${m[1]}</b></button>`).join('')}</div><button class="btn ghost" style="margin-top:16px" id="fechar">Voltar</button></div></div>`;
+  if (o.tipo === 'emerg') {
+    const g = EMERG[o.grupo];
+    return `<div class="over emerg"><div class="wrap"><p class="eyebrow" style="color:#fff;opacity:.8">Segurança</p><h1>${g.t}</h1>${g.p.map(x => `<p>${x}</p>`).join('')}
+      <a class="btn" href="tel:192" style="margin-top:18px;text-decoration:none">Ligar 192 (SAMU)</a>
+      <a class="btn ghost" href="${zap('Oi, sou a aluna ' + S.est.codigo + ' do app Sigma e acionei o alerta de segurança.')}" target="_blank" rel="noopener" style="margin-top:10px;text-decoration:none">Falar com a equipe</a>
+      <p id="avisoEq" style="font-size:14px;margin-top:16px;opacity:.9">${o.aviso || 'Avisando a equipe Sigma…'}</p>
+      <button class="btn ghost" style="margin-top:8px" id="fechar">Voltar ao app</button></div></div>`;
+  }
+  if (o.tipo === 'ck') {
+    if (o.resultado) return `<div class="over"><div class="wrap"><p class="eyebrow">Check-in ${o.numero} · orientações da equipe</p><h1>Para a sua próxima quinzena</h1>${o.resultado.map(t => `<div class="ori">${esc(t)}</div>`).join('')}<p class="small muted">Elas ficam guardadas na aba Evolução.</p><button class="btn" id="fechar" style="margin-top:12px">Voltar ao início</button></div></div>`;
+    const i = o.i, q = CK[i];
+    return `<div class="over"><div class="wrap"><p class="eyebrow">Check-in ${o.numero} · pergunta ${i + 1} de ${CK.length}</p><div class="prog"><i style="width:${(i / CK.length * 100).toFixed(0)}%"></i></div><h2 style="margin:18px 0 6px">${q.q}</h2>
+      <div class="place">${q.o.map((t, v) => `<button class="${o.r[q.k] === v ? 'on' : ''}" data-ck="${v}"><b style="font-size:17px;margin:0">${t}</b></button>`).join('')}</div>
+      <p class="err" id="ckErr"></p>
+      <button class="link" id="${i ? 'ckBack' : 'fechar'}">${i ? 'Voltar' : 'Fazer depois'}</button></div></div>`;
+  }
+  return '';
+}
+
+/* ---------- eventos ---------- */
+let filaDiario = {}, timerDiario;
+function ligarComum() {
+  document.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => { S.tela = b.dataset.tab; S.over = null; render(); window.scrollTo(0, 0); });
+  document.querySelectorAll('[data-d]').forEach(b => b.onclick = () => {
+    const k = b.dataset.d, v = +b.dataset.v;
+    const h = S.est.hoje = S.est.hoje || { d: '', s: null, e: null, t: null };
+    if (k === 'sono') h.s = v; if (k === 'energia') h.e = v; if (k === 'treinou') h.t = v;
+    document.querySelectorAll(`[data-d="${k}"]`).forEach(x => { const on = +x.dataset.v === v; x.classList.toggle('on', on); x.setAttribute('aria-pressed', on); });
+    filaDiario[k] = k === 'treinou' ? !!v : v;
+    $('#saved').textContent = 'Salvando…';
+    clearTimeout(timerDiario); timerDiario = setTimeout(enviarDiario, 700);
+  });
+  if ($('#fiz')) $('#fiz').onclick = async () => {
+    const b = $('#fiz'); b.disabled = true;
+    try { await api('app.diario', { treinou: true }); toast('Treino registrado. Muito bem!'); S.treinoSel = null; render(); }
+    catch (e) { b.disabled = false; toast('Sem conexão. Tente de novo.'); }
+  };
+  document.querySelectorAll('[data-treino]').forEach(b => b.onclick = () => { S.treinoSel = b.dataset.treino; render(); });
+  document.querySelectorAll('[data-video]').forEach(b => b.onclick = () => { S.over = { tipo: 'video', id: b.dataset.video, nome: b.dataset.nome }; render(); });
+  if ($('#sos')) $('#sos').onclick = () => { S.over = { tipo: 'sos' }; render(); };
+  document.querySelectorAll('[data-motivo]').forEach(b => b.onclick = () => abrirEmergencia(b.dataset.motivo, true));
+  if ($('#abrirCk')) $('#abrirCk').onclick = () => { S.over = { tipo: 'ck', i: 0, r: {}, numero: S.est.checkin.numero }; render(); };
+  document.querySelectorAll('[data-ck]').forEach(b => b.onclick = () => responderCk(+b.dataset.ck));
+  if ($('#ckBack')) $('#ckBack').onclick = () => { S.over.i--; render(); };
+  if ($('#fechar')) $('#fechar').onclick = () => { const ck = S.over && S.over.tipo === 'ck' && S.over.resultado; S.over = null; if (ck) S.tela = 'hoje'; render(); };
+  if ($('#modal')) $('#modal').onclick = ev => { if (ev.target.id === 'modal') { S.over = null; render(); } };
+  if ($('#sair')) $('#sair').onclick = () => sair(false);
+  if (S.tela === 'perfil') ligarLocal();
+}
+async function enviarDiario() {
+  const dados = filaDiario; filaDiario = {};
+  try { await api('app.diario', dados); const h = S.est.hoje || {}; const el = $('#saved'); if (el) el.textContent = h.s && h.e && h.t != null ? 'Diário de hoje salvo. Até amanhã!' : 'Salvo.'; if (S.tela === 'hoje') { const y = window.scrollY; render(); window.scrollTo(0, y); } }
+  catch (e) { Object.assign(filaDiario, dados); const el = $('#saved'); if (el) el.textContent = 'Sem conexão. Vamos tentar de novo em instantes.'; clearTimeout(timerDiario); timerDiario = setTimeout(enviarDiario, 5000); }
+}
+function abrirEmergencia(motivo, avisar) {
+  const grupo = ['peito', 'ar', 'desmaio'].includes(motivo) ? 'cardio' : motivo === 'queda' ? 'queda' : motivo === 'dor_forte' ? 'dor_forte' : 'cardio';
+  S.over = { tipo: 'emerg', grupo }; render();
+  if (!avisar) return;
+  api('app.alerta', { motivo }).then(() => { if (S.over && S.over.tipo === 'emerg') { S.over.aviso = 'A equipe Sigma foi avisada e vai entrar em contato.'; const el = $('#avisoEq'); if (el) el.textContent = S.over.aviso; } })
+    .catch(() => { if (S.over) { S.over.aviso = 'Não conseguimos avisar a equipe agora. Se puder, mande uma mensagem pelo botão acima.'; const el = $('#avisoEq'); if (el) el.textContent = S.over.aviso; } });
+}
+async function responderCk(v) {
+  const o = S.over, q = CK[o.i]; o.r[q.k] = v;
+  if (o.i < CK.length - 1) { o.i++; render(); return; }
+  const err = $('#ckErr'); document.querySelectorAll('[data-ck]').forEach(b => b.disabled = true); if (err) err.textContent = 'Enviando…';
+  try {
+    const j = await api('app.checkin', { respostas: o.r });
+    if (!j.ok) { if (err) err.textContent = j.erro === 'checkin_feito' ? 'Este check-in já foi feito.' : 'Não deu certo. Tente de novo.'; document.querySelectorAll('[data-ck]').forEach(b => b.disabled = false); return; }
+    if (j.emergencia) { S.over = { tipo: 'emerg', grupo: 'cardio', aviso: 'A equipe Sigma foi avisada e vai entrar em contato.' }; render(); return; }
+    o.resultado = j.orientacoes || []; render();
+  } catch (e) { if (err) err.textContent = 'Sem conexão. Toque na resposta de novo para reenviar.'; document.querySelectorAll('[data-ck]').forEach(b => b.disabled = false); }
+}
+
+/* ---------- início ---------- */
+render();
+if (S.sessao) api('app.estado').then(render).catch(() => {});
+document.addEventListener('visibilitychange', () => { if (!document.hidden && S.sessao && !S.over) api('app.estado').then(() => { if (!S.over) render(); }).catch(() => {}); });
+</script>
+</body>
+</html>

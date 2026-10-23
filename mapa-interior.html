@@ -810,7 +810,116 @@ function buildReport(){
    {titulo:'Comportamental',linhas:[p('Na voz dela',get('5')),sy('22'),sy('23'),sy('24'),sy('25'),sy('25b'),sy('26'),p('Se reconhece no espelho',(get('27')??'—')+'/10'),p('Mudança na energia',(msv('28','en')??'—')+'/10'),p('Mudança na disposição',(msv('28','di')??'—')+'/10'),p('Mudança na confiança em si',(msv('28','co')??'—')+'/10'),p('Sobrecarga',(get('33')??'—')+'/10'),p('Impacto da sexualidade na autoestima',get('20a')!=null?get('20a')+'/10':get('18b')!=null?get('18b')+'/10':null),p('Tratamentos anteriores',q36?QI['36'].o[q36.c]+(q36.t?': '+q36.t:''):null),p('Abordagem preferida',opt('35')),p('Motivação',(get('37')??'—')+'/10'),p('Espaço livre',get('38'))]}
   ];
   const medico=[...MED.map(x=>p(x[0],x[1])),...flags.filter(f=>f[0]==='').map(fl),...trhI.filter(x=>x[0]!=='ok').map(fl)];
-  return {html,text:T.join('\n'),sections:S,medico,flagsCount:flags.filter(f=>f[0]==='').length+EX.items.filter(x=>x[0]==='').length-(EX.stop?1:0),parqCount:EX.parq.length};
+  /* ---------- PDF visual (equipe e resumo médico) ---------- */
+  const pdf=()=>{
+   const C={alerta:['#FCE6E4','#8E1F1F','#C62F2F'],atencao:['#FFF4DC','#7A4F00','#C98A12'],info:['#E9F1F3','#17505C','#3F8696'],ok:['#E3F0E8','#2F6B4F','#5E9C7C'],'':['#FFFFFF','#33202A','#EAD9E0']};
+   const lc=v=>v==null?'#D9CDD3':v<.35?'#6F9180':v<.65?'#7E70C2':'#72243E';
+   const e=esc;
+   const bar=(pct,col,w)=>`<div style="width:${w||100}%;height:9px;background:#F1E7EB;border-radius:5px"><div style="width:${Math.max(0,Math.min(100,pct))}%;height:9px;background:${col};border-radius:5px"></div></div>`;
+   const pill=(t,col)=>`<span style="display:inline-block;padding:2px 8px;border-radius:9px;font-size:9px;font-weight:bold;color:#fff;background:${col}">${e(t)}</span>`;
+   const css=`<style>
+    body{font-family:Arial,Helvetica,sans-serif;color:#33202A;font-size:10.5px;margin:0}
+    h1{font-family:Georgia,serif;font-size:24px;margin:0;color:#fff;font-weight:normal}
+    h2{font-family:Georgia,serif;font-size:15px;font-weight:normal;color:#72243E;margin:18px 0 8px;border-bottom:1px solid #EAD9E0;padding-bottom:4px}
+    h2 small{font-family:Arial,sans-serif;font-size:9px;color:#7A6670;letter-spacing:1px;text-transform:uppercase;margin-left:6px}
+    table{border-collapse:collapse;width:100%}
+    td,th{vertical-align:top}
+    .t td{padding:5px 7px;border-bottom:1px solid #F1E7EB}
+    .t th{padding:5px 7px;text-align:left;font-size:8.5px;letter-spacing:1px;text-transform:uppercase;color:#7A6670;border-bottom:1px solid #EAD9E0}
+    .muted{color:#7A6670}
+    .kpi td.k{padding:10px 8px;text-align:center;border:1px solid #EAD9E0;border-radius:8px}
+    .k b{display:block;font-size:22px;font-family:Georgia,serif;font-weight:normal}
+    .k span{font-size:8.5px;letter-spacing:.8px;text-transform:uppercase;color:#7A6670}
+    .box{padding:10px 12px;border-radius:8px;margin:0 0 8px}
+    .box p{margin:0 0 5px}
+    .quote{font-family:Georgia,serif;font-style:italic;font-size:12px;color:#33202A;border-left:3px solid #B08A44;padding:4px 0 4px 10px;margin:6px 0}
+    .pb{page-break-before:always}
+    .foot{font-size:8px;color:#7A6670;margin-top:16px;border-top:1px solid #EAD9E0;padding-top:6px}
+   </style>`;
+   const head=(sub)=>`<table><tr><td style="background:#72243E;padding:16px 20px;border-radius:10px">
+     <div style="font-size:8.5px;letter-spacing:1.5px;text-transform:uppercase;color:#F5DCE5">${e(sub)}</div>
+     <h1>Meu Mapa Interior</h1>
+     <div style="color:#F5DCE5;font-size:10px;margin-top:6px">Código <b style="color:#fff">${e(CODE||'—')}</b> &nbsp;·&nbsp; Idade <b style="color:#fff">${age??'—'}</b> &nbsp;·&nbsp; Recebido em <b style="color:#fff">${today}</b></div>
+   </td></tr></table>`;
+   /* flor do mapa como imagem */
+   let flor='';
+   try{const N=D.length,S2=2,W=460,cv=document.createElement('canvas');cv.width=W*S2;cv.height=W*S2;const x=cv.getContext('2d');x.scale(S2,S2);x.fillStyle='#fff';x.fillRect(0,0,W,W);x.translate(W/2,W/2);
+    [45,80,115].forEach(r=>{x.beginPath();x.setLineDash([2,5]);x.strokeStyle='#E3D3DA';x.arc(0,0,r,0,7);x.stroke()});x.setLineDash([]);
+    D.forEach((d,i)=>{const ang=i*360/N;x.save();x.rotate(ang*Math.PI/180);const L=d.v==null?30:38+d.v*82,w=12+(d.v||0)*12;const p=new Path2D(petalPath(L,w));
+     if(d.v==null){x.setLineDash([3,3]);x.strokeStyle='#B9A9B1';x.stroke(p);x.setLineDash([])}else{x.globalAlpha=.85;x.fillStyle=lc(d.v);x.fill(p);x.globalAlpha=1;x.strokeStyle='#fff';x.lineWidth=1.5;x.stroke(p)}x.restore()});
+    x.beginPath();x.fillStyle='#B08A44';x.arc(0,0,12,0,7);x.fill();
+    x.font='500 12px Arial';x.fillStyle='#33202A';
+    D.forEach((d,i)=>{const rad=(i*360/N-90)*Math.PI/180,R=138,px=Math.cos(rad)*R,py=Math.sin(rad)*R;x.textAlign=px>12?'left':px<-12?'right':'center';x.fillText(d.n,px,py+4);
+     if(d.v!=null){x.font='bold 10px Arial';x.fillStyle=lc(d.v);x.fillText(Math.round(d.v*100),px,py+17);x.font='500 12px Arial';x.fillStyle='#33202A'}});
+    flor=`<img src="${cv.toDataURL('image/png')}" width="290" height="290">`}catch(err){flor=''}
+   /* sintomas */
+   const symList=symIds.map(id=>{const a=get(id);const f=a?a.f:null,i=a&&a.f?(a.i??0):0;return {id,q:QI[id].q,f,i,crit:!!(a&&a.f>=3&&i>=7),s:a&&a.f?(.4*a.f/4+.6*i/10):0}}).sort((a,b)=>b.s-a.s);
+   const crits=symList.filter(s=>s.crit);
+   const alertas=[...flags.filter(f=>f[0]===''),...EX.items.filter(x=>x[0]==='')].map(x=>x[1]).filter((v,i,a)=>a.indexOf(v)===i);
+   const atencoes=[...flags.filter(f=>f[0]==='warn'),...EX.items.filter(x=>x[0]==='warn')].map(x=>x[1]).filter((v,i,a)=>a.indexOf(v)===i);
+   const sarc=sarcF(),mot=get('37');
+   const kpi=(v,lab,col)=>`<td class="k" style="width:20%"><b style="color:${col}">${v}</b><span>${lab}</span></td>`;
+   const kpis=`<table class="kpi" style="border-collapse:separate;border-spacing:6px 0;margin:12px -6px 0"><tr>
+     ${kpi(alertas.length,'Alertas críticos',alertas.length?'#C62F2F':'#2F6B4F')}
+     ${kpi(crits.length,'Sintomas críticos',crits.length?'#C62F2F':'#2F6B4F')}
+     ${kpi(sarc==null?'—':sarc+'<small style="font-size:11px">/10</small>','SARC-F',sarc!=null&&sarc>=4?'#C62F2F':'#2F6B4F')}
+     ${kpi(EX.parq.length,'PAR-Q+ positivos',EX.parq.length?'#C98A12':'#2F6B4F')}
+     ${kpi(mot==null?'—':mot+'<small style="font-size:11px">/10</small>','Motivação',mot!=null&&mot<5?'#C98A12':'#72243E')}
+   </tr></table>`;
+   const Ds=[...D].sort((a,b)=>(b.v??-1)-(a.v??-1));
+   const mapa=`<table><tr><td style="width:52%;text-align:center;vertical-align:middle">${flor}</td><td style="width:48%">
+     <table class="t">${Ds.map(d=>{const [t]=lvl(d.v);return `<tr><td style="width:38%">${e(d.n)}</td><td style="width:40%;vertical-align:middle">${bar(d.v==null?0:d.v*100,lc(d.v))}</td><td style="width:9%;text-align:right"><b>${d.v==null?'—':Math.round(d.v*100)}</b></td><td style="width:13%;text-align:right">${pill(t,lc(d.v))}</td></tr>`}).join('')}</table>
+     <p class="muted" style="font-size:8.5px;margin:6px 0 0">Carga de 0 a 100: quanto maior, mais atenção a área pede. Índice interno, não substitui MRS, ICIQ-SF e FSFI.</p></td></tr></table>`;
+   const boxList=(titulo,arr,k)=>arr.length?`<div class="box" style="background:${C[k][0]};border-left:4px solid ${C[k][2]}"><p style="font-weight:bold;color:${C[k][1]};text-transform:uppercase;font-size:9px;letter-spacing:1px">${titulo}</p>${arr.map(t=>`<p style="color:${C[k][1]}">• ${e(t)}</p>`).join('')}</div>`:'';
+   const critBox=boxList('Pontos críticos · prioridade',[...alertas,...crits.map(s=>s.q+': '+FREQ[s.f].toLowerCase()+', intensidade '+s.i+'/10')],'alerta');
+   const warnBox=boxList('Pontos de atenção',atencoes,'atencao');
+   const okBox=!alertas.length&&!crits.length&&!atencoes.length?boxList('Sem sinalizações prioritárias',['Nenhum ponto crítico nas respostas.'],'ok'):'';
+   const symTable=`<table class="t"><tr><th style="width:44%">Sintoma</th><th style="width:18%">Frequência</th><th style="width:30%">Intensidade</th><th style="width:8%;text-align:right">0–10</th></tr>
+     ${symList.map(s=>{const col=s.crit?'#C62F2F':s.i>=7?'#72243E':s.i>=4?'#7E70C2':'#6F9180';return `<tr style="${s.crit?'background:#FCE6E4':''}"><td style="${s.crit?'color:#8E1F1F;font-weight:bold':''}">${e(s.q)}</td><td>${s.f==null?'—':FREQ[s.f]}</td><td style="vertical-align:middle">${s.f?bar(s.i*10,col):'<span class="muted">—</span>'}</td><td style="text-align:right"><b>${s.f?s.i:'—'}</b></td></tr>`}).join('')}</table>
+     <p class="muted" style="font-size:8.5px;margin:6px 0 0">Ordenado do mais ao menos intenso. Em vermelho: frequente ou quase sempre, com intensidade 7 ou mais.</p>`;
+   const g=(lab,v,good,txt)=>{const col=v==null?'#D9CDD3':(good?10-v:v)<=3?'#6F9180':(good?10-v:v)<=6?'#B08A44':'#72243E';return `<tr><td style="width:40%">${lab}</td><td style="width:44%;vertical-align:middle">${bar(v==null?0:v*10,col)}</td><td style="width:16%;text-align:right"><b>${v??'—'}</b><span class="muted">/10</span></td></tr>`};
+   const ident=`<table class="t">${g('Se reconhece no espelho',get('27'),true)}${g('Mudança na energia',msv('28','en'),false)}${g('Mudança na disposição',msv('28','di'),false)}${g('Mudança na confiança em si',msv('28','co'),false)}${g('Sobrecarga',get('33'),false)}${g('Motivação para se cuidar',get('37'),true)}</table>
+     <table class="t" style="margin-top:6px"><tr><td style="width:40%">Atividade física</td><td>${e(opt('29'))} · ${e(lst('30').join(', ')||'—')}</td></tr><tr><td>Alimentação (autoavaliação)</td><td>${e(opt('31'))}</td></tr><tr><td>Horas de sono</td><td>${e(opt('32'))}</td></tr></table>`;
+   const rowsOf=linhas=>`<table class="t">${linhas.map(l=>{const c=C[l.n]||C[''];const i=String(l.t).indexOf(': ');const k=l.n||i<0?'':String(l.t).slice(0,i),v=l.n||i<0?String(l.t):String(l.t).slice(i+2);
+     return l.n?`<tr><td colspan="2" style="background:${c[0]};color:${c[1]};border-left:4px solid ${c[2]};${l.n==='alerta'?'font-weight:bold':''}">${e(v)}</td></tr>`:`<tr><td style="width:36%" class="muted">${e(k)}</td><td>${e(v)}</td></tr>`}).join('')}</table>`;
+   const refsH=refs.length?`<table style="border-collapse:separate;border-spacing:0 6px">${refs.map(r=>`<tr><td style="background:#F5DCE5;border-radius:8px;padding:8px 12px"><b style="color:#72243E">${e(r.who)}</b><div style="margin-top:3px">${r.why.map(w=>'• '+e(w)).join('<br>')}</div></td></tr>`).join('')}</table>`:'<p class="muted">Nenhum encaminhamento sugerido.</p>';
+   const medTab=`<table class="t">${MED.map(x=>`<tr><td style="width:30%"><b>${e(x[0])}</b></td><td>${e(x[1])}</td></tr>`).join('')}</table>`;
+   const foot=`<div class="foot">Gerado automaticamente a partir do autorrelato da paciente. Complementar à consulta; não constitui diagnóstico nem prescrição. Cada profissional atua dentro da sua área: exames e movimento (fisioterapia), alimentação (nutrição), comportamento (CBM), hormônios e diagnóstico (médico). Dado sensível tratado sob TCLE e LGPD, art. 11.</div>`;
+   const q38=get('38'),q36=get('36');
+   const equipe=`<!DOCTYPE html><html><head><meta charset="utf-8">${css}</head><body>
+    ${head('Relatório de pré-consulta · uso exclusivo da equipe clínica')}
+    <p style="margin:10px 0 0"><span class="muted">Fase provável:</span> ${e(stage)}</p>
+    ${kpis}
+    <h2>Pontos críticos</h2>${critBox}${warnBox}${okBox}
+    <h2>Mapa por área <small>carga de 0 a 100</small></h2>${mapa}
+    <h2>Na voz dela <small>queixa principal</small></h2>${get('5')?`<p class="quote">“${e(get('5'))}”</p>`:'<p class="muted">Não respondeu.</p>'}
+    <div class="pb"></div>
+    <h2>Sintomas <small>frequência e intensidade</small></h2>${symTable}
+    <h2>Identidade e rotina</h2>${ident}
+    <div class="pb"></div>
+    <h2>Resumo para o médico</h2>${medTab}
+    <h2>Encaminhamentos sugeridos</h2>${refsH}
+    ${S.slice(1).map(s=>`<div class="pb"></div><h2>${e(s.titulo)}</h2>${rowsOf(s.linhas)}`).join('')}
+    <h2>Objetivos e preferências</h2><table class="t">
+     <tr><td style="width:36%" class="muted">Quer recuperar</td><td>${(get('34')||[]).map(i=>e(QI['34'].o[i])).join('; ')||'—'}</td></tr>
+     <tr><td class="muted">Abordagem preferida</td><td>${e(opt('35'))}</td></tr>
+     <tr><td class="muted">Tratamentos anteriores</td><td>${q36?e(QI['36'].o[q36.c])+(q36.t?': '+e(q36.t):''):'—'}</td></tr></table>
+    ${q38?`<h2>Espaço livre <small>na voz dela</small></h2><p class="quote">“${e(q38)}”</p>`:''}
+    ${foot}</body></html>`;
+   const medAlert=[...flags.filter(f=>f[0]===''),...trhI.filter(x=>x[0]==='')].map(x=>x[1]);
+   const medInfo=trhI.filter(x=>x[0]==='info'||x[0]==='warn').map(x=>x[1]);
+   const topD=Ds.filter(d=>d.v!=null&&d.v>=.35).slice(0,5);
+   const medico=`<!DOCTYPE html><html><head><meta charset="utf-8">${css}</head><body>
+    ${head('Resumo médico · meia página')}
+    ${boxList('Alertas para a consulta',medAlert,'alerta')}
+    <h2>Resumo</h2>${medTab}
+    ${medInfo.length?`<h2>${natural?'Saúde hormonal':'Indicadores para discussão de TRH'}</h2>${boxList('Indicadores',medInfo,'info')}`:''}
+    ${topD.length?`<h2>Áreas que mais pesam <small>carga de 0 a 100</small></h2><table class="t">${topD.map(d=>`<tr><td style="width:34%">${e(d.n)}</td><td style="width:50%;vertical-align:middle">${bar(d.v*100,lc(d.v))}</td><td style="text-align:right"><b>${Math.round(d.v*100)}</b> ${pill(lvl(d.v)[0],lc(d.v))}</td></tr>`).join('')}</table>`:''}
+    <div class="foot">Resumo gerado a partir do autorrelato da paciente, para orientar a consulta. A indicação e a prescrição de TRH são exclusivas do médico. Dado sensível tratado sob TCLE e LGPD, art. 11.</div>
+    </body></html>`;
+   return {equipe,medico};
+  };
+  return {pdf,html,text:T.join('\n'),sections:S,medico,flagsCount:flags.filter(f=>f[0]==='').length+EX.items.filter(x=>x[0]==='').length-(EX.stop?1:0),parqCount:EX.parq.length};
 }
 
 /* ---------- envio para a equipe (versão publicada) ---------- */
@@ -821,6 +930,8 @@ async function enviar(){
   if(!A._submittedAt)A._submittedAt=new Date().toISOString();
   const R=buildReport();
   const payload={token:CONFIG.TOKEN,code:CODE,submittedAt:A._submittedAt,consentAt:A._consentAt||null,declaracaoAt:get('m19')||null,age:get('1')??null,flags:R.flagsCount,sarcF:sarcF(),parq:R.parqCount,answers:A,sections:R.sections,medico:R.medico};
+  try{const P=R.pdf();payload.pdfHtml=P.equipe;payload.medicoHtml=P.medico}catch(e){}
+  try{const z=Object.fromEntries(domains().map(d=>[d.k,d.v]));const w=v=>v==null?null:Math.round((1-v)*100)/10;const q29=get('29');payload.flor={sono:w(z.sono),energia:w(z.energia),movimento:q29==null?null:[1,4,7,10][q29],calor:w(z.calor),clareza:w(z.mente),humor:w(z.emocoes)}}catch(e){}
   try{localStorage.setItem('mmi_pendente',JSON.stringify(payload))}catch(e){}
   if(st)st.textContent='Enviando suas respostas para a equipe…';if(rb)rb.hidden=true;
   try{
@@ -842,7 +953,21 @@ function loadDemo(){demo=true;if(!CODE)CODE='EXE-01';A={_consent:true,'1':47,'2'
  '29':1,'30':[0,3],'31':2,'32':1,'33':8,'m1':[0,4],'m2':[0],'m3':[1],'m2b':'','m3b':'','m4s':[0,4],'m4':'Vitamina D 2.000 UI, colágeno de marca X','m5':0,'m6':0,'m7':[2],'m8':1,'m9':0,'m10':1,'m11':1,'m12':1,'m13':1,'m14':[0,4],'m14b':0,'m15':{c:0,t:''},'m16':1,'m17':0,'m18':0,'m19':'2026-10-18T14:00:00Z',
  '34':[0,2,6],'35':2,'36':{c:3,t:'Já tomei vários remédios e nada.'},'37':8,'38':'Quero voltar a ter energia para brincar com meus netos.'}}
 
+/* ---------- reenvio automático de respostas que ficaram pendentes ---------- */
+window.addEventListener('beforeunload',e=>{if(sending){e.preventDefault();e.returnValue=''}});
+async function reenviarPendente(){
+  if(CONFIG.PROTOTIPO||!CONFIG.ENDPOINT)return;
+  let p=null;try{p=JSON.parse(localStorage.getItem('mmi_pendente')||'null')}catch(e){}
+  if(!p||!p.token)return;
+  try{
+    const r=await fetch(CONFIG.ENDPOINT,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(p)});
+    const j=await r.json();
+    if(j.ok){try{localStorage.removeItem('mmi_pendente')}catch(e){}}
+  }catch(e){}
+}
+
 render();
+reenviarPendente();
 </script>
 
 </body>
