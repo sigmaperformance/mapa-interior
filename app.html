@@ -8,6 +8,10 @@
 <meta name="apple-mobile-web-app-title" content="Sigma">
 <meta name="robots" content="noindex">
 <title>App Sigma · 90 dias</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -393,6 +397,7 @@ function telaAvaliacao() {
     <div class="card"><ul class="rules" style="margin:0"><li>Leva cerca de 15 minutos.</li><li>Responda com calma, num lugar tranquilo.</li><li>Não existe resposta certa ou errada.</li></ul></div>
     <button class="btn" id="irMapa">Começar meu Mapa Interior</button>
     <div class="card" style="margin-top:22px"><p class="eyebrow">Depois do Mapa</p><ul class="rules" style="margin:0"><li>A equipe lê as suas respostas.</li><li>Você recebe a mensagem de que o seu dia 1 foi liberado.</li><li>Aqui no app aparecem o seu diário, os treinos e a sua flor.</li></ul></div>
+    ${cardInstalar()}
     <button class="link" id="sair" style="display:block;margin:10px auto 0">Sair deste aparelho</button>`;
   return `<p class="brand">Sigma Mulher 35+</p>
     <div class="card hl" style="margin-top:22px"><p class="eyebrow">Mapa Interior recebido</p><h2>Recebemos as suas respostas</h2>
@@ -409,6 +414,7 @@ function ligarAvaliacao() {
     catch (e) { b.disabled = false; b.textContent = 'Ver se já foi liberado'; toast('Sem conexão. Tente de novo.'); }
   };
   if ($('#sair')) $('#sair').onclick = () => sair(false);
+  ligarInstalar();
 }
 
 /* ---------- casa ou academia ---------- */
@@ -471,7 +477,28 @@ function telaHoje() {
     <p class="small" style="margin:8px 0 12px">Nesta semana: <b>${sem} de 3</b> treinos</p>
     <button class="btn ghost" data-tab="treinos">Abrir treinos</button>
   </div>
+  ${cardInstalar()}
   <button class="sos" id="sos">Senti algo estranho</button>`;
+}
+
+/* ---------- atalho na tela inicial ---------- */
+let pedidoInstalar = null;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); pedidoInstalar = e; if (S.sessao && !S.over) render(); });
+window.addEventListener('appinstalled', () => { pedidoInstalar = null; LS.set('sigma_app_sem_atalho', 1); toast('Pronto. O app Sigma está na sua tela inicial.'); });
+const instalado = () => { try { return matchMedia('(display-mode: standalone)').matches || navigator.standalone === true; } catch (e) { return false; } };
+const ehIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+function cardInstalar() {
+  if (instalado() || LS.get('sigma_app_sem_atalho')) return '';
+  const como = pedidoInstalar
+    ? `<button class="btn" id="instalar">Colocar na tela inicial</button>`
+    : ehIOS()
+      ? `<ol class="rules" style="margin:8px 0 0"><li>Abra este link no <b>Safari</b>.</li><li>Toque em <b>Compartilhar</b> (o quadrado com a seta para cima).</li><li>Toque em <b>Adicionar à Tela de Início</b> e depois em <b>Adicionar</b>.</li></ol><p class="small muted" style="margin:8px 0 0">Na primeira vez que abrir pelo ícone, entre de novo com o seu código e a sua senha.</p>`
+      : `<ol class="rules" style="margin:8px 0 0"><li>No Chrome, toque nos <b>três pontinhos</b> (⋮), no canto de cima.</li><li>Toque em <b>Adicionar à tela inicial</b> ou <b>Instalar app</b>.</li></ol>`;
+  return `<div class="card" id="cardAtalho"><p class="eyebrow">Atalho no celular</p><h3>Deixe o app Sigma na sua tela inicial</h3><p class="muted small" style="margin:6px 0 10px">Ele ganha o ícone da Sigma e abre direto, como um aplicativo.</p>${como}<button class="link" id="semAtalho" style="display:block;margin:6px auto 0">Agora não</button></div>`;
+}
+function ligarInstalar() {
+  if ($('#instalar')) $('#instalar').onclick = async () => { const p = pedidoInstalar; if (!p) return; p.prompt(); try { const r = await p.userChoice; if (r.outcome === 'accepted') LS.set('sigma_app_sem_atalho', 1); } catch (e) {} pedidoInstalar = null; render(); };
+  if ($('#semAtalho')) $('#semAtalho').onclick = () => { LS.set('sigma_app_sem_atalho', 1); const c = $('#cardAtalho'); if (c) c.remove(); };
 }
 
 /* ---------- treinos ---------- */
@@ -623,6 +650,7 @@ function ligarComum() {
   if ($('#modal')) $('#modal').onclick = ev => { if (ev.target.id === 'modal') { S.over = null; render(); } };
   if ($('#sair')) $('#sair').onclick = () => sair(false);
   if (S.tela === 'perfil') ligarLocal();
+  ligarInstalar();
 }
 async function enviarDiario() {
   const dados = filaDiario; filaDiario = {};
@@ -649,6 +677,7 @@ async function responderCk(v) {
 }
 
 /* ---------- início ---------- */
+try { if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {}); } catch (e) {}
 render();
 if (S.sessao) api('app.estado').then(render).catch(() => {});
 document.addEventListener('visibilitychange', () => { if (!document.hidden && S.sessao && !S.over) api('app.estado').then(() => { if (!S.over) render(); }).catch(() => {}); });
