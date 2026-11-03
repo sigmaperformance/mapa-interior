@@ -479,7 +479,7 @@ function telaHoje() {
     <p class="eyebrow">Treino</p>
     ${e.local === 'academia'
       ? `<h3>Dia de academia ou de casa?</h3><p class="muted small">Na academia, siga o guia do Método Sigma da sua fase. Em casa, o próximo treino com o TRX é o <b>${pt}</b>.</p>`
-      : `<h3>Próximo treino: ${pt}</h3><p class="muted small">${(treinosDaFase(f)[pt] || []).length} exercícios · ${voltas(f, d)} · cerca de 20 minutos</p>`}
+      : `<h3>Próximo treino: ${pt}</h3><p class="muted small">${(treinosDaFase(f)[pt] || []).length === 1 ? 'Aula completa em vídeo · siga o professor' : (treinosDaFase(f)[pt] || []).length + ' exercícios · ' + voltas(f, d) + ' · cerca de 20 minutos'}</p>`}
     <p class="small" style="margin:8px 0 12px">Nesta semana: <b>${sem} de 3</b> treinos</p>
     <button class="btn ghost" data-tab="treinos">Abrir treinos</button>
   </div>
@@ -512,19 +512,30 @@ function telaTreinos() {
   const e = S.est, d = Math.max(1, Math.min(e.dia || 1, 90)), f = faseAluna(e, d), pt = proximoTreino(e);
   const G = treinosDaFase(f), letras = Object.keys(G).sort();
   const sel = S.treinoSel && letras.includes(S.treinoSel) ? S.treinoSel : pt;
+  // Treino com um vídeo só = aula completa gravada (o professor conduz séries, tempo e descanso)
+  const ehAula = t => (G[t] || []).length === 1, soAulas = letras.every(ehAula), aulaSel = ehAula(sel);
+  const listaTreinos = letras.length > 1 ? letras.slice(0, -1).join(', ') + ' e ' + letras[letras.length - 1] : letras[0];
+  const regras = soAulas
+    ? [letras.length > 1 ? `Aulas ${listaTreinos}, em sequência.` : `Aula ${listaTreinos}. As próximas aulas aparecem aqui assim que forem liberadas.`, 'Siga a aula em vídeo: o professor conduz os exercícios, o tempo e o descanso.', 'Ajuste a intensidade pela inclinação do corpo no TRX.']
+    : [`${letras.length > 1 ? 'Treinos' : 'Treino'} ${listaTreinos}${letras.length > 1 ? ', em sequência' : ''}.`, ...f.regras];
   const trilha = `
     <div class="card">
       <p class="eyebrow">Nível ${f.n} de 3 · ${f.adiantado ? 'liberado pela equipe' : 'dias ' + f.de + ' a ' + f.ate}</p>
       <h2>${f.nome}</h2>
       <p class="muted" style="margin:6px 0 0">${f.foco}</p>
-      <ul class="rules"><li>${letras.length > 1 ? 'Treinos ' + letras.slice(0, -1).join(', ') + ' e ' + letras[letras.length - 1] + ', em sequência.' : 'Treino ' + letras[0] + '.'}</li>${f.regras.map(r => `<li>${r}</li>`).join('')}</ul>
+      <ul class="rules">${regras.map(r => `<li>${r}</li>`).join('')}</ul>
       <p class="small muted" style="margin-top:10px">Meta: 3 treinos por semana, com um dia de descanso entre eles.</p>
     </div>
     <div class="seg" role="tablist">${letras.map(t => `<button role="tab" class="${t === sel ? 'on' : ''}" data-treino="${t}" aria-selected="${t === sel}">Treino ${t}${t === pt ? '<small>Próximo</small>' : ''}</button>`).join('')}</div>
-    <div class="card">
+    ${aulaSel ? (x => `<div class="card">
+      <p class="eyebrow">Aula completa em vídeo</p>
+      <h2>${esc(x.nome)}</h2>
+      ${x.ajuste ? `<p class="muted" style="margin:6px 0 0">${esc(x.ajuste)}</p>` : ''}
+      ${x.video ? `<button class="btn" style="margin-top:14px" data-video="${esc(x.video)}" data-nome="${esc(x.nome)}">Assistir à aula</button>` : ''}
+    </div>`)(G[sel][0]) : `<div class="card">
       <p class="eyebrow">Circuito · ${voltas(f, d)}</p>
       ${(G[sel] || []).map((x, i) => `<div class="ex"><span class="n">${i + 1}</span><div style="flex:1"><h3>${esc(x.nome)}</h3><p><b>${esc(x.reps)}</b> · ${esc(x.ajuste)}</p>${x.video ? `<button class="btn ghost sm" style="margin-top:8px" data-video="${esc(x.video)}" data-nome="${esc(x.nome)}">Ver vídeo</button>` : ''}</div></div>`).join('')}
-    </div>
+    </div>`}
     <button class="btn" id="fiz">Concluí este treino</button>
     <p class="small muted center" style="margin-top:10px">Se sentir dor que não passa, tontura ou falta de ar, pare e toque em <b>Senti algo estranho</b>, na tela Hoje.</p>`;
   if (e.local !== 'academia') return `<h1>Treinos em casa</h1>${trilha}`;
